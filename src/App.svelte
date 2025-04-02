@@ -2,7 +2,8 @@
   import { onMount } from "svelte";
   import Weather from "./lib/Weather.svelte";
   import Settings from "./lib/Settings.svelte";
-  import { widgetLayout } from "./lib/stores/widgetStore";
+  import { widgetLayout, defaultLayout } from "./lib/stores/widgetStore";
+  import type { Widget } from "./lib/stores/widgetStore";
   import { weatherService } from "./lib/weatherService";
 
   let timeString;
@@ -15,14 +16,24 @@
 
   let cityName = "";
 
+  $: clockConfig =
+    $widgetLayout?.widgets?.clock?.config ?? defaultLayout.widgets.clock.config;
+  $: clockWidget = $widgetLayout?.widgets?.clock ?? defaultLayout.widgets.clock;
+  $: weatherConfig =
+    $widgetLayout?.widgets?.weather?.config ??
+    defaultLayout.widgets.weather.config;
+  $: weatherWidget =
+    $widgetLayout?.widgets?.weather ?? defaultLayout.widgets.weather;
+  $: grid = $widgetLayout?.grid ?? defaultLayout.grid;
+
   function updateTime() {
     const options = {
-      hour: clockWidget?.show24Hour
+      hour: clockConfig?.show24Hour
         ? ("2-digit" as const)
         : ("numeric" as const),
       minute: "2-digit" as const,
-      second: clockWidget?.showSeconds ? ("2-digit" as const) : undefined,
-      hour12: !clockWidget?.show24Hour,
+      second: clockConfig?.showSeconds ? ("2-digit" as const) : undefined,
+      hour12: !clockConfig?.show24Hour,
     };
     timeString = new Date().toLocaleTimeString("en-US", options);
   }
@@ -31,10 +42,10 @@
     updateTime();
     const interval = setInterval(
       updateTime,
-      clockWidget?.showSeconds ? 1000 : 60000,
+      clockConfig?.showSeconds ? 1000 : 60000,
     );
 
-    if (clockWidget?.showLocation) {
+    if (clockConfig?.showLocation) {
       (async () => {
         const location = weatherService.getSavedLocation();
         if (location) {
@@ -46,9 +57,6 @@
 
     return () => clearInterval(interval);
   });
-
-  $: clockWidget = $widgetLayout.clock;
-  $: weatherWidget = $widgetLayout.weather;
 
   const sizeClasses = {
     sm: "col-span-1 row-span-1",
@@ -77,7 +85,7 @@
               <p class="text-xl md:text-2xl lg:text-3xl font-normal opacity-80">
                 {dateString}
               </p>
-              {#if clockWidget.showLocation && cityName}
+              {#if clockConfig.showLocation && cityName}
                 <p
                   class="text-lg md:text-xl lg:text-2xl font-normal opacity-60 mt-2"
                 >

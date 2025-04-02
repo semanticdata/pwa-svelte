@@ -1,7 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { weatherService } from "./weatherService";
-    import { widgetLayout } from "./stores/widgetStore";
+    import { widgetLayout, defaultLayout } from "./stores/widgetStore";
+    import type { Widget } from "./stores/widgetStore";
 
     let showModal = false;
     let apiKey = "";
@@ -12,6 +13,7 @@
     let longitude = "";
     let locationSearch = "";
     let searchError = "";
+    let activeTab = "grid";
 
     onMount(() => {
         apiKey = localStorage.getItem("openweather_api_key") || "";
@@ -91,8 +93,10 @@
         }
     }
 
-    function updateWidgetConfig(id, config) {
-        widgetLayout.updateWidget(id, config);
+    function updateWidgetConfig(id: Widget["id"], config: Partial<Widget>) {
+        if ($widgetLayout?.widgets) {
+            widgetLayout.updateWidget(id, config);
+        }
     }
 
     function handleClockEnable(e: Event) {
@@ -127,6 +131,12 @@
         updateWidgetConfig("weather", {
             order: Math.max(0, parseInt(target.value) || 0),
         });
+    }
+
+    function updateGridConfig(key: keyof GridConfig, value: any) {
+        if ($widgetLayout?.grid) {
+            widgetLayout.updateGrid({ [key]: value });
+        }
     }
 </script>
 
@@ -165,259 +175,319 @@
             class="modal-box max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800"
         >
             <h3 class="font-bold text-lg mb-4">Settings</h3>
-            <div class="form-control w-full">
-                <label class="label" for="apiKey">
-                    <span class="label-text">OpenWeather API Key</span>
-                </label>
-                <input
-                    type="password"
-                    id="apiKey"
-                    placeholder="Enter your API key"
-                    class="input input-bordered w-full"
-                    bind:value={apiKey}
-                />
-                <label class="label" for="apiKeyHelp"></label>
-                <label for="apiKeyHelp" class="label-text-alt"
-                    >Get your API key from <a
-                        href="https://openweathermap.org/api"
-                        target="_blank"
-                        class="link">OpenWeather</a
-                    ></label
+
+            <div class="tabs tabs-boxed mb-4">
+                <button
+                    class="tab {activeTab === 'grid' ? 'tab-active' : ''}"
+                    on:click={() => (activeTab = "grid")}
                 >
-                <span id="apiKeyHelp" class="sr-only"
-                    >Link to OpenWeather API documentation</span
+                    Grid
+                </button>
+                <button
+                    class="tab {activeTab === 'widgets' ? 'tab-active' : ''}"
+                    on:click={() => (activeTab = "widgets")}
                 >
-            </div>
-            <div class="form-control w-full mt-4">
-                <label class="label" for="units">
-                    <span class="label-text">Temperature Units</span>
-                </label>
-                <select
-                    id="units"
-                    class="select select-bordered w-full"
-                    bind:value={units}
+                    Widgets
+                </button>
+                <button
+                    class="tab {activeTab === 'weather' ? 'tab-active' : ''}"
+                    on:click={() => (activeTab = "weather")}
                 >
-                    <option value="metric">Metric (°C, m/s)</option>
-                    <option value="imperial">Imperial (°F, mph)</option>
-                </select>
+                    Weather
+                </button>
             </div>
 
-            <div class="form-control w-full mt-4">
-                <label class="label cursor-pointer">
-                    <span class="label-text">Use Manual Location</span>
+            {#if activeTab === "grid"}
+                <div class="form-control w-full">
+                    <label class="label" for="gridLayout">Grid Layout</label>
+                    <div class="grid grid-cols-2 gap-4" id="gridLayout">
+                        <div>
+                            <label class="label" for="columns">Columns</label>
+                            <input
+                                type="number"
+                                id="columns"
+                                class="input input-bordered w-full"
+                                value={$widgetLayout.grid.columns}
+                                min="1"
+                                max="12"
+                                on:change={(e) =>
+                                    updateGridConfig(
+                                        "columns",
+                                        parseInt(e.target.value),
+                                    )}
+                            />
+                        </div>
+                        <div>
+                            <label class="label" for="rows">Rows</label>
+                            <input
+                                type="number"
+                                id="rows"
+                                class="input input-bordered w-full"
+                                value={$widgetLayout.grid.rows}
+                                min="1"
+                                max="12"
+                                on:change={(e) =>
+                                    updateGridConfig(
+                                        "rows",
+                                        parseInt(e.target.value),
+                                    )}
+                            />
+                        </div>
+                        <div>
+                            <label class="label" for="gap">Gap (rem)</label>
+                            <input
+                                type="number"
+                                id="gap"
+                                class="input input-bordered w-full"
+                                value={$widgetLayout.grid.gap}
+                                min="0"
+                                max="8"
+                                step="0.5"
+                                on:change={(e) =>
+                                    updateGridConfig(
+                                        "gap",
+                                        parseFloat(e.target.value),
+                                    )}
+                            />
+                        </div>
+                        <div>
+                            <label class="label" for="direction"
+                                >Direction</label
+                            >
+                            <select
+                                id="direction"
+                                class="select select-bordered w-full"
+                                value={$widgetLayout.grid.direction}
+                                on:change={(e) =>
+                                    updateGridConfig(
+                                        "direction",
+                                        e.target.value,
+                                    )}
+                            >
+                                <option value="horizontal">Horizontal</option>
+                                <option value="vertical">Vertical</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            {:else if activeTab === "widgets" && $widgetLayout?.widgets}
+                {#each Object.values($widgetLayout.widgets) as widget}
+                    <div class="collapse collapse-arrow bg-base-200 mb-2">
+                        <input type="checkbox" id="widget-{widget.id}" />
+                        <div class="collapse-title font-medium">
+                            <label for="widget-{widget.id}">
+                                {widget.id.charAt(0).toUpperCase() +
+                                    widget.id.slice(1)} Widget
+                            </label>
+                        </div>
+                        <div class="collapse-content">
+                            <div class="form-control">
+                                <label class="label cursor-pointer">
+                                    <span class="label-text">Enable</span>
+                                    <input
+                                        type="checkbox"
+                                        id="enable-{widget.id}"
+                                        class="toggle"
+                                        checked={widget.enabled}
+                                        on:change={(e) =>
+                                            updateWidgetConfig(widget.id, {
+                                                enabled: e.target.checked,
+                                            })}
+                                    />
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mt-2">
+                                <div>
+                                    <label class="label" for="width-{widget.id}"
+                                        >Width</label
+                                    >
+                                    <input
+                                        type="number"
+                                        id="width-{widget.id}"
+                                        class="input input-bordered w-full"
+                                        value={widget.size.w}
+                                        min="1"
+                                        max={$widgetLayout.grid.columns}
+                                        on:change={(e) =>
+                                            updateWidgetConfig(widget.id, {
+                                                size: {
+                                                    ...widget.size,
+                                                    w: parseInt(e.target.value),
+                                                },
+                                            })}
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="label"
+                                        for="height-{widget.id}">Height</label
+                                    >
+                                    <input
+                                        type="number"
+                                        id="height-{widget.id}"
+                                        class="input input-bordered w-full"
+                                        value={widget.size.h}
+                                        min="1"
+                                        max={$widgetLayout.grid.rows}
+                                        on:change={(e) =>
+                                            updateWidgetConfig(widget.id, {
+                                                size: {
+                                                    ...widget.size,
+                                                    h: parseInt(e.target.value),
+                                                },
+                                            })}
+                                    />
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <label class="label" for="order-{widget.id}"
+                                    >Order</label
+                                >
+                                <input
+                                    type="number"
+                                    id="order-{widget.id}"
+                                    class="input input-bordered w-full"
+                                    value={widget.order}
+                                    min="0"
+                                    on:change={(e) =>
+                                        updateWidgetConfig(widget.id, {
+                                            order: parseInt(e.target.value),
+                                        })}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                {/each}
+            {:else if activeTab === "weather"}
+                <div class="form-control w-full">
+                    <label class="label" for="apiKey">
+                        <span class="label-text">OpenWeather API Key</span>
+                    </label>
                     <input
-                        type="checkbox"
-                        class="toggle bg-gray-200 checked:bg-blue-500"
-                        bind:checked={useManualLocation}
+                        type="password"
+                        id="apiKey"
+                        placeholder="Enter your API key"
+                        class="input input-bordered w-full"
+                        bind:value={apiKey}
                     />
-                </label>
-            </div>
+                    <label class="label" for="apiKeyHelp"></label>
+                    <label for="apiKeyHelp" class="label-text-alt"
+                        >Get your API key from <a
+                            href="https://openweathermap.org/api"
+                            target="_blank"
+                            class="link">OpenWeather</a
+                        ></label
+                    >
+                    <span id="apiKeyHelp" class="sr-only"
+                        >Link to OpenWeather API documentation</span
+                    >
+                </div>
+                <div class="form-control w-full mt-4">
+                    <label class="label" for="units">
+                        <span class="label-text">Temperature Units</span>
+                    </label>
+                    <select
+                        id="units"
+                        class="select select-bordered w-full"
+                        bind:value={units}
+                    >
+                        <option value="metric">Metric (°C, m/s)</option>
+                        <option value="imperial">Imperial (°F, mph)</option>
+                    </select>
+                </div>
 
-            {#if import.meta.env.DEV}
                 <div class="form-control w-full mt-4">
                     <label class="label cursor-pointer">
-                        <span class="label-text"
-                            >Use Mock Weather Data (Dev Only)</span
-                        >
+                        <span class="label-text">Use Manual Location</span>
                         <input
                             type="checkbox"
                             class="toggle bg-gray-200 checked:bg-blue-500"
-                            bind:checked={useMockWeather}
-                            on:change={handleMockWeatherToggle}
+                            bind:checked={useManualLocation}
                         />
                     </label>
                 </div>
-            {/if}
 
-            {#if useManualLocation}
-                <div class="form-control w-full mt-4">
-                    <label class="label" for="locationSearch">
-                        <span class="label-text">Search Location</span>
-                    </label>
-                    <div class="flex gap-2">
-                        <input
-                            type="text"
-                            id="locationSearch"
-                            placeholder="Enter city name or zip code"
-                            class="input input-bordered flex-1"
-                            bind:value={locationSearch}
-                            disabled={!useManualLocation}
-                            aria-describedby="searchError"
-                        />
-                        <button
-                            class="btn bg-blue-500 hover:bg-blue-600 text-white"
-                            on:click={searchByLocation}
-                            disabled={!useManualLocation || !locationSearch}
-                        >
-                            Search
-                        </button>
+                {#if import.meta.env.DEV}
+                    <div class="form-control w-full mt-4">
+                        <label class="label cursor-pointer">
+                            <span class="label-text"
+                                >Use Mock Weather Data (Dev Only)</span
+                            >
+                            <input
+                                type="checkbox"
+                                class="toggle bg-gray-200 checked:bg-blue-500"
+                                bind:checked={useMockWeather}
+                                on:change={handleMockWeatherToggle}
+                            />
+                        </label>
                     </div>
-                    {#if searchError}
+                {/if}
+
+                {#if useManualLocation}
+                    <div class="form-control w-full mt-4">
                         <label class="label" for="locationSearch">
-                            <span
-                                id="searchError"
-                                class="label-text-alt text-error"
-                                >{searchError}</span
+                            <span class="label-text">Search Location</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input
+                                type="text"
+                                id="locationSearch"
+                                placeholder="Enter city name or zip code"
+                                class="input input-bordered flex-1"
+                                bind:value={locationSearch}
+                                disabled={!useManualLocation}
+                                aria-describedby="searchError"
+                            />
+                            <button
+                                class="btn bg-blue-500 hover:bg-blue-600 text-white"
+                                on:click={searchByLocation}
+                                disabled={!useManualLocation || !locationSearch}
+                            >
+                                Search
+                            </button>
+                        </div>
+                        {#if searchError}
+                            <label class="label" for="locationSearch">
+                                <span
+                                    id="searchError"
+                                    class="label-text-alt text-error"
+                                    >{searchError}</span
+                                >
+                            </label>
+                        {/if}
+                    </div>
+                    <div class="form-control w-full mt-4">
+                        <label class="label" for="coordinatesGroup">
+                            <span class="label-text"
+                                >Coordinates (auto-filled from search)</span
                             >
                         </label>
-                    {/if}
-                </div>
-                <div class="form-control w-full mt-4">
-                    <label class="label" for="coordinatesGroup">
-                        <span class="label-text"
-                            >Coordinates (auto-filled from search)</span
+                        <div
+                            id="coordinatesGroup"
+                            class="grid grid-cols-2 gap-2"
                         >
-                    </label>
-                    <div id="coordinatesGroup" class="grid grid-cols-2 gap-2">
-                        <input
-                            type="text"
-                            id="latitude"
-                            placeholder="Latitude"
-                            class="input input-bordered"
-                            bind:value={latitude}
-                            disabled
-                            aria-label="Latitude"
-                        />
-                        <input
-                            type="text"
-                            id="longitude"
-                            placeholder="Longitude"
-                            class="input input-bordered"
-                            bind:value={longitude}
-                            disabled
-                            aria-label="Longitude"
-                        />
+                            <input
+                                type="text"
+                                id="latitude"
+                                placeholder="Latitude"
+                                class="input input-bordered"
+                                bind:value={latitude}
+                                disabled
+                                aria-label="Latitude"
+                            />
+                            <input
+                                type="text"
+                                id="longitude"
+                                placeholder="Longitude"
+                                class="input input-bordered"
+                                bind:value={longitude}
+                                disabled
+                                aria-label="Longitude"
+                            />
+                        </div>
                     </div>
-                </div>
+                {/if}
             {/if}
-
-            <div class="divider mt-4">Widget Layout</div>
-
-            <div class="form-control w-full">
-                <label class="label font-semibold" for="clockEnabled"
-                    >Clock Widget</label
-                >
-                <div class="flex gap-4 items-center">
-                    <label class="cursor-pointer flex items-center gap-2">
-                        <span class="label-text">Enable</span>
-                        <input
-                            type="checkbox"
-                            id="clockEnabled"
-                            class="toggle bg-gray-200 checked:bg-blue-500"
-                            checked={$widgetLayout.clock.enabled}
-                            on:change={handleClockEnable}
-                        />
-                    </label>
-                    <div class="flex-1">
-                        <label class="label-text" for="clockSize">Size</label>
-                        <select
-                            id="clockSize"
-                            class="select select-bordered w-full"
-                            value={$widgetLayout.clock.size}
-                            on:change={handleClockSize}
-                        >
-                            <option value="sm">Small</option>
-                            <option value="md">Medium</option>
-                            <option value="lg">Large</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="label-text" for="clockOrder">Order</label>
-                        <input
-                            type="number"
-                            id="clockOrder"
-                            class="input input-bordered w-24"
-                            value={$widgetLayout.clock.order}
-                            on:change={handleClockOrder}
-                            min="0"
-                            placeholder="Order"
-                        />
-                    </div>
-                </div>
-                <div class="flex gap-4 items-center mt-2">
-                    <label class="cursor-pointer flex items-center gap-2">
-                        <span class="label-text">24-Hour Format</span>
-                        <input
-                            type="checkbox"
-                            class="toggle bg-gray-200 checked:bg-blue-500"
-                            checked={$widgetLayout.clock.show24Hour}
-                            on:change={(e) =>
-                                updateWidgetConfig("clock", {
-                                    show24Hour: e.currentTarget.checked,
-                                })}
-                        />
-                    </label>
-                    <label class="cursor-pointer flex items-center gap-2">
-                        <span class="label-text">Show Seconds</span>
-                        <input
-                            type="checkbox"
-                            class="toggle bg-gray-200 checked:bg-blue-500"
-                            checked={$widgetLayout.clock.showSeconds}
-                            on:change={(e) =>
-                                updateWidgetConfig("clock", {
-                                    showSeconds: e.currentTarget.checked,
-                                })}
-                        />
-                    </label>
-                    <label class="cursor-pointer flex items-center gap-2">
-                        <span class="label-text">Show Location</span>
-                        <input
-                            type="checkbox"
-                            class="toggle bg-gray-200 checked:bg-blue-500"
-                            checked={$widgetLayout.clock.showLocation}
-                            on:change={(e) =>
-                                updateWidgetConfig("clock", {
-                                    showLocation: e.currentTarget.checked,
-                                })}
-                        />
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-control w-full mt-4">
-                <label class="label font-semibold" for="weatherEnabled"
-                    >Weather Widget</label
-                >
-                <div class="flex gap-4 items-center">
-                    <label class="cursor-pointer flex items-center gap-2">
-                        <span class="label-text">Enable</span>
-                        <input
-                            type="checkbox"
-                            id="weatherEnabled"
-                            class="toggle bg-gray-200 checked:bg-blue-500"
-                            checked={$widgetLayout.weather.enabled}
-                            on:change={handleWeatherEnable}
-                        />
-                    </label>
-                    <div class="flex-1">
-                        <label class="label-text" for="weatherSize">Size</label>
-                        <select
-                            id="weatherSize"
-                            class="select select-bordered w-full"
-                            value={$widgetLayout.weather.size}
-                            on:change={handleWeatherSize}
-                        >
-                            <option value="sm">Small</option>
-                            <option value="md">Medium</option>
-                            <option value="lg">Large</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="label-text" for="weatherOrder"
-                            >Order</label
-                        >
-                        <input
-                            type="number"
-                            id="weatherOrder"
-                            class="input input-bordered w-24"
-                            value={$widgetLayout.weather.order}
-                            on:change={handleWeatherOrder}
-                            min="0"
-                            placeholder="Order"
-                        />
-                    </div>
-                </div>
-            </div>
 
             <div class="modal-action">
                 <button class="btn" on:click={() => (showModal = false)}
