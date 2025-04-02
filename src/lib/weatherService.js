@@ -46,7 +46,9 @@ class WeatherService {
                 condition: data.weather[0].main,
                 description: data.weather[0].description,
                 icon: data.weather[0].icon,
-                location: data.name
+                location: data.name,
+                humidity: data.main.humidity,
+                windSpeed: Math.round(data.wind.speed * 10) / 10
             };
         } catch (error) {
             throw new Error(`Failed to fetch weather data: ${error.message}`);
