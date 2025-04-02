@@ -25,15 +25,17 @@
   });
 </script>
 
-<main
-  class="flex flex-col justify-center items-center min-h-screen bg-black text-white font-sans p-5 md:p-10 text-center select-none antialiased"
->
-  <div class="mb-8 md:mb-12">
-    <div class="text-[clamp(3rem,15vw,8rem)] font-bold mb-4 -tracking-[1px]">
-      {timeString}
-    </div>
-    <div class="text-[clamp(1.5rem,5vw,2.5rem)] font-normal opacity-90">
-      {dateString}
+<main class="min-h-screen bg-base-100 p-4 md:p-8 select-none">
+  <div class="hero min-h-[40vh] bg-base-200 rounded-box mb-8">
+    <div class="hero-content text-center">
+      <div>
+        <h1 class="text-[clamp(3rem,15vw,8rem)] font-bold mb-4 tracking-tight">
+          {timeString}
+        </h1>
+        <p class="text-[clamp(1.5rem,5vw,2.5rem)] font-normal opacity-80">
+          {dateString}
+        </p>
+      </div>
     </div>
   </div>
   <Weather />
