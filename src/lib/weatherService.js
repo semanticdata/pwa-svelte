@@ -7,8 +7,14 @@ const CACHE_DURATION = 3600000; // 1 hour in milliseconds
 class WeatherService {
     constructor() {
         this.location = this.getSavedLocation();
-        OPENWEATHER_API_KEY = localStorage.getItem('openweather_api_key') || '';
-        UNITS = localStorage.getItem('weather_units') || 'metric';
+    }
+
+    getApiKey() {
+        return localStorage.getItem('openweather_api_key') || '';
+    }
+
+    getUnits() {
+        return localStorage.getItem('weather_units') || 'metric';
     }
 
     setApiKey(apiKey) {
@@ -20,9 +26,49 @@ class WeatherService {
         localStorage.setItem('weather_units', units);
     }
 
+    async searchLocation(query) {
+        try {
+            const apiKey = this.getApiKey();
+            if (!apiKey) {
+                throw new Error('API key not found. Please set your OpenWeather API key in settings.');
+            }
+            const encodedQuery = encodeURIComponent(query);
+            const response = await fetch(
+                `https://api.openweathermap.org/geo/1.0/direct?q=${encodedQuery}&limit=1&appid=${apiKey}`
+            );
+            if (!response.ok) {
+                throw new Error(`Location search failed with status ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.length === 0) {
+                throw new Error('Location not found');
+            }
+            const location = {
+                lat: data[0].lat,
+                lon: data[0].lon
+            };
+            this.saveLocation(location);
+            return location;
+        } catch (error) {
+            throw new Error(`Failed to search location: ${error.message}`);
+        }
+    }
+
     async getCurrentPosition() {
         return new Promise((resolve, reject) => {
+            const useManualLocation = localStorage.getItem('use_manual_location') === 'true';
+            const savedLocation = this.getSavedLocation();
+
+            if (useManualLocation && savedLocation) {
+                resolve(savedLocation);
+                return;
+            }
+
             if (!navigator.geolocation) {
+                if (savedLocation) {
+                    resolve(savedLocation);
+                    return;
+                }
                 reject(new Error('Geolocation is not supported by your browser'));
                 return;
             }
@@ -37,6 +83,10 @@ class WeatherService {
                     resolve(location);
                 },
                 (error) => {
+                    if (savedLocation) {
+                        resolve(savedLocation);
+                        return;
+                    }
                     reject(new Error(`Failed to get location: ${error.message}`));
                 }
             );
@@ -44,7 +94,6 @@ class WeatherService {
     }
 
     async getWeather(coords, forceRefresh = false) {
-        // Check cache first if not forcing refresh
         if (!forceRefresh) {
             const cachedData = this.getCachedWeather();
             if (cachedData) {
@@ -53,36 +102,72 @@ class WeatherService {
         }
 
         try {
-            const response = await fetch(
-                `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&units=${UNITS}&appid=${OPENWEATHER_API_KEY}`
+            const apiKey = this.getApiKey();
+            const units = this.getUnits();
+            
+            if (!apiKey) {
+                throw new Error('API key not found. Please set your OpenWeather API key in settings.');
+            }
+
+            // Get current weather (free tier)
+            const currentResponse = await fetch(
+                `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&units=${units}&appid=${apiKey}`
             );
-            if (!response.ok) {
-                if (response.status === 401) {
+            if (!currentResponse.ok) {
+                if (currentResponse.status === 401) {
                     throw new Error('Invalid API key. Please ensure you have a valid OpenWeather API key.');
                 }
-                throw new Error(`Weather data fetch failed with status ${response.status}`);
+                throw new Error(`Weather data fetch failed with status ${currentResponse.status}`);
             }
-            const data = await response.json();
-            const windSpeedUnit = UNITS === 'imperial' ? 'mph' : 'm/s';
-            const tempUnit = UNITS === 'imperial' ? '°F' : '°C';
+            const currentData = await currentResponse.json();
 
-            return {
-                temperature: Math.round(data.main.temp),
-                condition: data.weather[0].main,
-                description: data.weather[0].description,
-                icon: data.weather[0].icon,
-                location: data.name,
-                humidity: data.main.humidity,
-                windSpeed: Math.round(data.wind.speed * 10) / 10,
+            // Get 5-day forecast (free tier)
+            const forecastResponse = await fetch(
+                `https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&units=${units}&appid=${apiKey}`
+            );
+            if (!forecastResponse.ok) {
+                throw new Error(`Forecast data fetch failed with status ${forecastResponse.status}`);
+            }
+            const forecastData = await forecastResponse.json();
+
+            const windSpeedUnit = units === 'imperial' ? 'mph' : 'm/s';
+            const tempUnit = units === 'imperial' ? '°F' : '°C';
+            const pressureUnit = 'hPa';
+
+            // Get daily forecasts by filtering one reading per day at noon
+            const dailyForecasts = forecastData.list
+                .filter(item => item.dt_txt.includes('12:00:00'))
+                .slice(0, 5)
+                .map(day => ({
+                    date: new Date(day.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' }),
+                    tempMax: Math.round(day.main.temp_max),
+                    tempMin: Math.round(day.main.temp_min),
+                    icon: day.weather[0].icon,
+                    description: day.weather[0].description
+                }));
+
+            const current = {
+                temperature: Math.round(currentData.main.temp),
+                feelsLike: Math.round(currentData.main.feels_like),
+                condition: currentData.weather[0].main,
+                description: currentData.weather[0].description,
+                icon: currentData.weather[0].icon,
+                location: currentData.name,
+                humidity: currentData.main.humidity,
+                pressure: currentData.main.pressure,
+                windSpeed: Math.round(currentData.wind.speed * 10) / 10,
+                sunrise: new Date(currentData.sys.sunrise * 1000).toLocaleTimeString(),
+                sunset: new Date(currentData.sys.sunset * 1000).toLocaleTimeString(),
                 units: {
                     temp: tempUnit,
-                    wind: windSpeedUnit
-                }
+                    wind: windSpeedUnit,
+                    pressure: pressureUnit
+                },
+                daily: dailyForecasts
             };
 
-            // Cache the weather data
-            this.cacheWeather(data);
-            return data;
+            this.cacheWeather(current);
+            return current;
         } catch (error) {
             throw new Error(`Failed to fetch weather data: ${error.message}`);
         }

@@ -83,9 +83,20 @@
 
                     <div class="stats bg-base-300 shadow">
                         <div class="stat">
+                            <div class="stat-title">Feels Like</div>
+                            <div class="stat-value">{weather.feelsLike}{weather.units.temp}</div>
+                        </div>
+                        <div class="stat">
                             <div class="stat-title">Humidity</div>
                             <div class="stat-value">{weather.humidity}%</div>
                         </div>
+                        <div class="stat">
+                            <div class="stat-title">Pressure</div>
+                            <div class="stat-value">{weather.pressure} {weather.units.pressure}</div>
+                        </div>
+                    </div>
+
+                    <div class="stats bg-base-300 shadow">
                         <div class="stat">
                             <div class="stat-title">Wind Speed</div>
                             <div class="stat-value">
@@ -93,6 +104,35 @@
                                 {weather.units.wind}
                             </div>
                         </div>
+                        <div class="stat">
+                            <div class="stat-title">Sun Times</div>
+                            <div class="stat-value text-lg">
+                                🌅 {weather.sunrise}
+                                <br />
+                                🌇 {weather.sunset}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider">5-Day Forecast</div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        {#each weather.daily as day}
+                            <div class="stat bg-base-300 shadow rounded-box p-4">
+                                <div class="stat-title text-center">{day.date}</div>
+                                <div class="flex justify-center">
+                                    <img
+                                        src={`https://openweathermap.org/img/wn/${day.icon}.png`}
+                                        alt={day.description}
+                                        class="w-12 h-12"
+                                    />
+                                </div>
+                                <div class="stat-value text-center text-lg">
+                                    {day.tempMax}°
+                                    <span class="text-base opacity-60">/{day.tempMin}°</span>
+                                </div>
+                            </div>
+                        {/each}
                     </div>
 
                     <div class="flex flex-col items-center gap-2 mt-2">

@@ -5,18 +5,74 @@
     let showModal = false;
     let apiKey = "";
     let units = "metric";
+    let useManualLocation = false;
+    let latitude = "";
+    let longitude = "";
+    let locationSearch = "";
+    let searchError = "";
 
     onMount(() => {
         apiKey = localStorage.getItem("openweather_api_key") || "";
         units = localStorage.getItem("weather_units") || "metric";
+        useManualLocation = localStorage.getItem("use_manual_location") === "true";
+        const savedLocation = weatherService.getSavedLocation();
+        if (savedLocation) {
+            latitude = savedLocation.lat.toString();
+            longitude = savedLocation.lon.toString();
+        }
     });
 
-    function saveSettings() {
-        localStorage.setItem("openweather_api_key", apiKey);
-        localStorage.setItem("weather_units", units);
-        weatherService.setApiKey(apiKey);
-        weatherService.setUnits(units);
-        showModal = false;
+    async function validateApiKey(key) {
+        try {
+            const response = await fetch(
+                `https://api.openweathermap.org/data/2.5/weather?q=London&appid=${key}`
+            );
+            if (response.status === 401) {
+                throw new Error("Invalid API key. Please check your OpenWeather API key.");
+            }
+            return true;
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+
+    async function searchByLocation() {
+        try {
+            searchError = "";
+            if (!apiKey) {
+                throw new Error("Please enter your OpenWeather API key first.");
+            }
+            const location = await weatherService.searchLocation(locationSearch);
+            latitude = location.lat.toString();
+            longitude = location.lon.toString();
+        } catch (error) {
+            searchError = error.message;
+        }
+    }
+
+    async function saveSettings() {
+        try {
+            searchError = "";
+            if (apiKey) {
+                await validateApiKey(apiKey);
+            }
+            
+            localStorage.setItem("openweather_api_key", apiKey);
+            localStorage.setItem("weather_units", units);
+            localStorage.setItem("use_manual_location", useManualLocation.toString());
+            weatherService.setApiKey(apiKey);
+            weatherService.setUnits(units);
+
+            if (useManualLocation && latitude && longitude) {
+                weatherService.saveLocation({
+                    lat: parseFloat(latitude),
+                    lon: parseFloat(longitude)
+                });
+            }
+            showModal = false;
+        } catch (error) {
+            searchError = error.message;
+        }
     }
 </script>
 
@@ -89,6 +145,67 @@
                     <option value="imperial">Imperial (°F, mph)</option>
                 </select>
             </div>
+
+            <div class="form-control w-full mt-4">
+                <label class="label cursor-pointer">
+                    <span class="label-text">Use Manual Location</span>
+                    <input
+                        type="checkbox"
+                        class="toggle toggle-primary"
+                        bind:checked={useManualLocation}
+                    />
+                </label>
+            </div>
+
+            {#if useManualLocation}
+                <div class="form-control w-full mt-4">
+                    <label class="label">
+                        <span class="label-text">Search Location</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <input
+                            type="text"
+                            placeholder="Enter city name or zip code"
+                            class="input input-bordered flex-1"
+                            bind:value={locationSearch}
+                            disabled={!useManualLocation}
+                        />
+                        <button
+                            class="btn btn-primary"
+                            on:click={searchByLocation}
+                            disabled={!useManualLocation || !locationSearch}
+                        >
+                            Search
+                        </button>
+                    </div>
+                    {#if searchError}
+                        <label class="label">
+                            <span class="label-text-alt text-error">{searchError}</span>
+                        </label>
+                    {/if}
+                </div>
+                <div class="form-control w-full mt-4">
+                    <label class="label">
+                        <span class="label-text">Coordinates (auto-filled from search)</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input
+                            type="text"
+                            placeholder="Latitude"
+                            class="input input-bordered"
+                            bind:value={latitude}
+                            disabled
+                        />
+                        <input
+                            type="text"
+                            placeholder="Longitude"
+                            class="input input-bordered"
+                            bind:value={longitude}
+                            disabled
+                        />
+                    </div>
+                </div>
+            {/if}
             <div class="modal-action">
                 <button class="btn" on:click={() => (showModal = false)}
                     >Cancel</button
