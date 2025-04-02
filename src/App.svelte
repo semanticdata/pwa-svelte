@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import Weather from './lib/Weather.svelte';
+  import Settings from './lib/Settings.svelte';
 
   let timeString;
   let dateString = new Date().toLocaleDateString('en-US', {
@@ -39,4 +40,5 @@
     </div>
   </div>
   <Weather />
+  <Settings />
 </main>

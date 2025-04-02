@@ -1,4 +1,4 @@
-const OPENWEATHER_API_KEY = 'YOUR_API_KEY';
+let OPENWEATHER_API_KEY = localStorage.getItem('openweather_api_key') || '';
 const STORAGE_KEY = 'weather_location';
 const WEATHER_CACHE_KEY = 'weather_cache';
 const CACHE_DURATION = 3600000; // 1 hour in milliseconds
@@ -6,6 +6,11 @@ const CACHE_DURATION = 3600000; // 1 hour in milliseconds
 class WeatherService {
     constructor() {
         this.location = this.getSavedLocation();
+        OPENWEATHER_API_KEY = localStorage.getItem('openweather_api_key') || '';
+    }
+
+    setApiKey(apiKey) {
+        OPENWEATHER_API_KEY = apiKey;
     }
 
     async getCurrentPosition() {
