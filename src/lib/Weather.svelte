@@ -36,10 +36,12 @@
     });
 </script>
 
-<div class="card w-full max-w-[600px] bg-base-200 shadow-xl backdrop-blur-lg">
-    <div class="card-body">
-        <h2 class="card-title text-[clamp(1.5rem,4vw,2rem)] mb-4">Weather</h2>
-        <div class="text-[clamp(1rem,3vw,1.25rem)]">
+<div class="card w-full bg-white dark:bg-gray-800 shadow-xl backdrop-blur-lg flex-1 min-h-0">
+    <div class="card-body h-full overflow-y-auto p-4">
+        <h2 class="card-title text-2xl mb-2 sticky top-0 bg-white dark:bg-gray-800 py-2 z-10">
+            Weather
+        </h2>
+        <div class="text-base">
             {#if loading}
                 <div class="flex justify-center">
                     <span class="loading loading-spinner loading-lg"></span>
@@ -61,52 +63,64 @@
                     <span>{error}</span>
                 </div>
             {:else if weather}
-                <div class="flex flex-col gap-4">
-                    <div class="stats bg-base-300 shadow">
-                        <div class="stat">
+                <div class="flex flex-col gap-2">
+                    <div class="stats stats-compact bg-gray-100 dark:bg-gray-700 shadow">
+                        <div class="stat py-2">
                             <div class="stat-figure text-secondary">
                                 <img
                                     src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
                                     alt={weather.description}
-                                    class="w-16 h-16"
+                                    class="w-12 h-12"
                                 />
                             </div>
-                            <div class="stat-title capitalize">
+                            <div class="stat-title text-sm capitalize">
                                 {weather.description}
                             </div>
-                            <div class="stat-value text-4xl">
+                            <div class="stat-value text-2xl">
                                 {weather.temperature}{weather.units.temp}
                             </div>
-                            <div class="stat-desc">{weather.location}</div>
-                        </div>
-                    </div>
-
-                    <div class="stats bg-base-300 shadow">
-                        <div class="stat">
-                            <div class="stat-title">Feels Like</div>
-                            <div class="stat-value">{weather.feelsLike}{weather.units.temp}</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-title">Humidity</div>
-                            <div class="stat-value">{weather.humidity}%</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-title">Pressure</div>
-                            <div class="stat-value">{weather.pressure} {weather.units.pressure}</div>
-                        </div>
-                    </div>
-
-                    <div class="stats bg-base-300 shadow">
-                        <div class="stat">
-                            <div class="stat-title">Wind Speed</div>
-                            <div class="stat-value">
-                                {weather.windSpeed}
-                                {weather.units.wind}
+                            <div class="stat-desc text-sm">
+                                {weather.location}
                             </div>
                         </div>
-                        <div class="stat">
-                            <div class="stat-title">Sun Times</div>
-                            <div class="stat-value text-lg">
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="stat bg-base-300 shadow rounded-box p-2">
+                            <div class="stat-title text-xs">Feels Like</div>
+                            <div class="stat-value text-xl">
+                                {weather.feelsLike}{weather.units.temp}
+                            </div>
+                        </div>
+                        <div class="stat bg-base-300 shadow rounded-box p-2">
+                            <div class="stat-title text-xs">Humidity</div>
+                            <div class="stat-value text-xl">
+                                {weather.humidity}%
+                            </div>
+                        </div>
+                        <div class="stat bg-base-300 shadow rounded-box p-2">
+                            <div class="stat-title text-xs">Pressure</div>
+                            <div class="stat-value text-xl">
+                                {weather.pressure}
+                            </div>
+                            <div class="stat-desc text-xs">
+                                {weather.units.pressure}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="stat bg-base-300 shadow rounded-box p-2">
+                            <div class="stat-title text-xs">Wind Speed</div>
+                            <div class="stat-value text-xl">
+                                {weather.windSpeed}
+                                <span class="text-sm">{weather.units.wind}</span
+                                >
+                            </div>
+                        </div>
+                        <div class="stat bg-base-300 shadow rounded-box p-2">
+                            <div class="stat-title text-xs">Sun Times</div>
+                            <div class="stat-desc text-sm">
                                 🌅 {weather.sunrise}
                                 <br />
                                 🌇 {weather.sunset}
@@ -114,22 +128,28 @@
                         </div>
                     </div>
 
-                    <div class="divider">5-Day Forecast</div>
-                    
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="divider my-1 text-sm">5-Day Forecast</div>
+
+                    <div class="grid grid-cols-5 gap-1">
                         {#each weather.daily as day}
-                            <div class="stat bg-base-300 shadow rounded-box p-4">
-                                <div class="stat-title text-center">{day.date}</div>
+                            <div
+                                class="stat bg-base-300 shadow rounded-box p-2"
+                            >
+                                <div class="stat-title text-xs text-center">
+                                    {day.date}
+                                </div>
                                 <div class="flex justify-center">
                                     <img
                                         src={`https://openweathermap.org/img/wn/${day.icon}.png`}
                                         alt={day.description}
-                                        class="w-12 h-12"
+                                        class="w-8 h-8"
                                     />
                                 </div>
-                                <div class="stat-value text-center text-lg">
+                                <div class="stat-value text-center text-base">
                                     {day.tempMax}°
-                                    <span class="text-base opacity-60">/{day.tempMin}°</span>
+                                    <span class="text-sm opacity-60"
+                                        >/{day.tempMin}°</span
+                                    >
                                 </div>
                             </div>
                         {/each}
@@ -138,7 +158,7 @@
                     <div class="flex flex-col items-center gap-2 mt-2">
                         <button
                             on:click={() => loadWeather(true)}
-                            class="btn btn-circle btn-primary"
+                            class="btn btn-circle bg-blue-500 hover:bg-blue-600 text-white"
                             title="Refresh weather data"
                             aria-label="Refresh weather data"
                         >

@@ -1,21 +1,21 @@
 <script>
-  import { onMount } from 'svelte';
-  import Weather from './lib/Weather.svelte';
-  import Settings from './lib/Settings.svelte';
+  import { onMount } from "svelte";
+  import Weather from "./lib/Weather.svelte";
+  import Settings from "./lib/Settings.svelte";
 
   let timeString;
-  let dateString = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  let dateString = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   function updateTime() {
-    timeString = new Date().toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+    timeString = new Date().toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   }
 
@@ -26,8 +26,10 @@
   });
 </script>
 
-<main class="min-h-screen bg-base-100 p-4 md:p-8 select-none">
-  <div class="hero min-h-[40vh] bg-base-200 rounded-box mb-8">
+<main
+  class="h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8 select-none flex flex-col gap-4 overflow-hidden"
+>
+  <div class="hero bg-white dark:bg-gray-800 rounded-box shrink-0">
     <div class="hero-content text-center">
       <div>
         <h1 class="text-[clamp(3rem,15vw,8rem)] font-bold mb-4 tracking-tight">

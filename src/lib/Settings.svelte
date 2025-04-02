@@ -14,7 +14,8 @@
     onMount(() => {
         apiKey = localStorage.getItem("openweather_api_key") || "";
         units = localStorage.getItem("weather_units") || "metric";
-        useManualLocation = localStorage.getItem("use_manual_location") === "true";
+        useManualLocation =
+            localStorage.getItem("use_manual_location") === "true";
         const savedLocation = weatherService.getSavedLocation();
         if (savedLocation) {
             latitude = savedLocation.lat.toString();
@@ -25,10 +26,12 @@
     async function validateApiKey(key) {
         try {
             const response = await fetch(
-                `https://api.openweathermap.org/data/2.5/weather?q=London&appid=${key}`
+                `https://api.openweathermap.org/data/2.5/weather?q=London&appid=${key}`,
             );
             if (response.status === 401) {
-                throw new Error("Invalid API key. Please check your OpenWeather API key.");
+                throw new Error(
+                    "Invalid API key. Please check your OpenWeather API key.",
+                );
             }
             return true;
         } catch (error) {
@@ -42,7 +45,8 @@
             if (!apiKey) {
                 throw new Error("Please enter your OpenWeather API key first.");
             }
-            const location = await weatherService.searchLocation(locationSearch);
+            const location =
+                await weatherService.searchLocation(locationSearch);
             latitude = location.lat.toString();
             longitude = location.lon.toString();
         } catch (error) {
@@ -56,17 +60,20 @@
             if (apiKey) {
                 await validateApiKey(apiKey);
             }
-            
+
             localStorage.setItem("openweather_api_key", apiKey);
             localStorage.setItem("weather_units", units);
-            localStorage.setItem("use_manual_location", useManualLocation.toString());
+            localStorage.setItem(
+                "use_manual_location",
+                useManualLocation.toString(),
+            );
             weatherService.setApiKey(apiKey);
             weatherService.setUnits(units);
 
             if (useManualLocation && latitude && longitude) {
                 weatherService.saveLocation({
                     lat: parseFloat(latitude),
-                    lon: parseFloat(longitude)
+                    lon: parseFloat(longitude),
                 });
             }
             showModal = false;
@@ -78,7 +85,7 @@
 
 <div class="fixed bottom-4 right-4">
     <button
-        class="btn btn-circle btn-primary"
+        class="btn btn-circle bg-blue-500 hover:bg-blue-600 text-white"
         on:click={() => (showModal = true)}
         aria-label="Open settings"
     >
@@ -107,7 +114,7 @@
 
 {#if showModal}
     <div class="modal modal-open">
-        <div class="modal-box">
+        <div class="modal-box max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800">
             <h3 class="font-bold text-lg mb-4">Settings</h3>
             <div class="form-control w-full">
                 <label class="label" for="apiKey">
@@ -151,7 +158,7 @@
                     <span class="label-text">Use Manual Location</span>
                     <input
                         type="checkbox"
-                        class="toggle toggle-primary"
+                        class="toggle bg-gray-200 checked:bg-blue-500"
                         bind:checked={useManualLocation}
                     />
                 </label>
@@ -159,19 +166,21 @@
 
             {#if useManualLocation}
                 <div class="form-control w-full mt-4">
-                    <label class="label">
+                    <label class="label" for="locationSearch">
                         <span class="label-text">Search Location</span>
                     </label>
                     <div class="flex gap-2">
                         <input
                             type="text"
+                            id="locationSearch"
                             placeholder="Enter city name or zip code"
                             class="input input-bordered flex-1"
                             bind:value={locationSearch}
                             disabled={!useManualLocation}
+                            aria-describedby="searchError"
                         />
                         <button
-                            class="btn btn-primary"
+                            class="btn bg-blue-500 hover:bg-blue-600 text-white"
                             on:click={searchByLocation}
                             disabled={!useManualLocation || !locationSearch}
                         >
@@ -179,29 +188,39 @@
                         </button>
                     </div>
                     {#if searchError}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{searchError}</span>
+                        <label class="label" for="locationSearch">
+                            <span
+                                id="searchError"
+                                class="label-text-alt text-error"
+                                >{searchError}</span
+                            >
                         </label>
                     {/if}
                 </div>
                 <div class="form-control w-full mt-4">
-                    <label class="label">
-                        <span class="label-text">Coordinates (auto-filled from search)</span>
+                    <label class="label" for="coordinatesGroup">
+                        <span class="label-text"
+                            >Coordinates (auto-filled from search)</span
+                        >
                     </label>
-                    <div class="grid grid-cols-2 gap-2">
+                    <div id="coordinatesGroup" class="grid grid-cols-2 gap-2">
                         <input
                             type="text"
+                            id="latitude"
                             placeholder="Latitude"
                             class="input input-bordered"
                             bind:value={latitude}
                             disabled
+                            aria-label="Latitude"
                         />
                         <input
                             type="text"
+                            id="longitude"
                             placeholder="Longitude"
                             class="input input-bordered"
                             bind:value={longitude}
                             disabled
+                            aria-label="Longitude"
                         />
                     </div>
                 </div>
@@ -210,8 +229,9 @@
                 <button class="btn" on:click={() => (showModal = false)}
                     >Cancel</button
                 >
-                <button class="btn btn-primary" on:click={saveSettings}
-                    >Save</button
+                <button
+                    class="btn bg-blue-500 hover:bg-blue-600 text-white"
+                    on:click={saveSettings}>Save</button
                 >
             </div>
         </div>
