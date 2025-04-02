@@ -37,7 +37,7 @@
 </script>
 
 <div
-    class="card w-full bg-white dark:bg-gray-800 shadow-xl backdrop-blur-lg flex-1 min-h-0"
+    class="card w-full h-full bg-white dark:bg-gray-800 shadow-xl backdrop-blur-lg"
 >
     <div class="card-body h-full overflow-y-auto p-4">
         <h2

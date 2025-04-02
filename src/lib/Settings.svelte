@@ -1,6 +1,7 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import { weatherService } from "./weatherService";
+    import { widgetLayout } from "./stores/widgetStore";
 
     let showModal = false;
     let apiKey = "";
@@ -87,6 +88,44 @@
         } catch (error) {
             searchError = error.message;
         }
+    }
+
+    function updateWidgetConfig(id, config) {
+        widgetLayout.updateWidget(id, config);
+    }
+
+    function handleClockEnable(e: Event) {
+        const target = e.currentTarget as HTMLInputElement;
+        updateWidgetConfig("clock", { enabled: target.checked });
+    }
+
+    function handleClockSize(e: Event) {
+        const target = e.currentTarget as HTMLSelectElement;
+        updateWidgetConfig("clock", { size: target.value });
+    }
+
+    function handleClockOrder(e: Event) {
+        const target = e.currentTarget as HTMLInputElement;
+        updateWidgetConfig("clock", {
+            order: Math.max(0, parseInt(target.value) || 0),
+        });
+    }
+
+    function handleWeatherEnable(e: Event) {
+        const target = e.currentTarget as HTMLInputElement;
+        updateWidgetConfig("weather", { enabled: target.checked });
+    }
+
+    function handleWeatherSize(e: Event) {
+        const target = e.currentTarget as HTMLSelectElement;
+        updateWidgetConfig("weather", { size: target.value });
+    }
+
+    function handleWeatherOrder(e: Event) {
+        const target = e.currentTarget as HTMLInputElement;
+        updateWidgetConfig("weather", {
+            order: Math.max(0, parseInt(target.value) || 0),
+        });
     }
 </script>
 
@@ -250,6 +289,97 @@
                     </div>
                 </div>
             {/if}
+
+            <div class="divider mt-4">Widget Layout</div>
+
+            <div class="form-control w-full">
+                <label class="label font-semibold" for="clockEnabled"
+                    >Clock Widget</label
+                >
+                <div class="flex gap-4 items-center">
+                    <label class="cursor-pointer flex items-center gap-2">
+                        <span class="label-text">Enable</span>
+                        <input
+                            type="checkbox"
+                            id="clockEnabled"
+                            class="toggle bg-gray-200 checked:bg-blue-500"
+                            checked={$widgetLayout.clock.enabled}
+                            on:change={handleClockEnable}
+                        />
+                    </label>
+                    <div class="flex-1">
+                        <label class="label-text" for="clockSize">Size</label>
+                        <select
+                            id="clockSize"
+                            class="select select-bordered w-full"
+                            value={$widgetLayout.clock.size}
+                            on:change={handleClockSize}
+                        >
+                            <option value="sm">Small</option>
+                            <option value="md">Medium</option>
+                            <option value="lg">Large</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label-text" for="clockOrder">Order</label>
+                        <input
+                            type="number"
+                            id="clockOrder"
+                            class="input input-bordered w-24"
+                            value={$widgetLayout.clock.order}
+                            on:change={handleClockOrder}
+                            min="0"
+                            placeholder="Order"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-control w-full mt-4">
+                <label class="label font-semibold" for="weatherEnabled"
+                    >Weather Widget</label
+                >
+                <div class="flex gap-4 items-center">
+                    <label class="cursor-pointer flex items-center gap-2">
+                        <span class="label-text">Enable</span>
+                        <input
+                            type="checkbox"
+                            id="weatherEnabled"
+                            class="toggle bg-gray-200 checked:bg-blue-500"
+                            checked={$widgetLayout.weather.enabled}
+                            on:change={handleWeatherEnable}
+                        />
+                    </label>
+                    <div class="flex-1">
+                        <label class="label-text" for="weatherSize">Size</label>
+                        <select
+                            id="weatherSize"
+                            class="select select-bordered w-full"
+                            value={$widgetLayout.weather.size}
+                            on:change={handleWeatherSize}
+                        >
+                            <option value="sm">Small</option>
+                            <option value="md">Medium</option>
+                            <option value="lg">Large</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label-text" for="weatherOrder"
+                            >Order</label
+                        >
+                        <input
+                            type="number"
+                            id="weatherOrder"
+                            class="input input-bordered w-24"
+                            value={$widgetLayout.weather.order}
+                            on:change={handleWeatherOrder}
+                            min="0"
+                            placeholder="Order"
+                        />
+                    </div>
+                </div>
+            </div>
+
             <div class="modal-action">
                 <button class="btn" on:click={() => (showModal = false)}
                     >Cancel</button
