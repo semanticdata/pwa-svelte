@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { weatherService } from "./weatherService";
     import { widgetLayout, defaultLayout } from "./stores/widgetStore";
-    import type { Widget } from "./stores/widgetStore";
+    import type { Widget, GridConfig, WidgetSize } from "./stores/widgetStore";
 
     let showModal = false;
     let apiKey = "";
@@ -99,41 +99,60 @@
         }
     }
 
-    function handleClockEnable(e: Event) {
-        const target = e.currentTarget as HTMLInputElement;
-        updateWidgetConfig("clock", { enabled: target.checked });
+    function handleWidgetEnable(widget: Widget, e: Event) {
+        const target = e.target as HTMLInputElement;
+        updateWidgetConfig(widget.id, { enabled: target.checked });
     }
 
-    function handleClockSize(e: Event) {
-        const target = e.currentTarget as HTMLSelectElement;
-        updateWidgetConfig("clock", { size: target.value });
+    function handleInputChange(
+        e: Event,
+        callback: (value: string | number | boolean) => void,
+    ) {
+        const target = e.target as HTMLInputElement | HTMLSelectElement;
+        const value =
+            target.type === "checkbox"
+                ? (target as HTMLInputElement).checked
+                : target.value;
+        callback(value);
+    }
+
+    function handleClockEnable(e: Event) {
+        handleInputChange(e, (value) =>
+            updateWidgetConfig("clock", { enabled: value as boolean }),
+        );
     }
 
     function handleClockOrder(e: Event) {
-        const target = e.currentTarget as HTMLInputElement;
-        updateWidgetConfig("clock", {
-            order: Math.max(0, parseInt(target.value) || 0),
-        });
+        handleInputChange(e, (value) =>
+            updateWidgetConfig("clock", {
+                order: Math.max(0, parseInt(value as string) || 0),
+            }),
+        );
     }
 
     function handleWeatherEnable(e: Event) {
-        const target = e.currentTarget as HTMLInputElement;
-        updateWidgetConfig("weather", { enabled: target.checked });
-    }
-
-    function handleWeatherSize(e: Event) {
-        const target = e.currentTarget as HTMLSelectElement;
-        updateWidgetConfig("weather", { size: target.value });
+        handleInputChange(e, (value) =>
+            updateWidgetConfig("weather", { enabled: value as boolean }),
+        );
     }
 
     function handleWeatherOrder(e: Event) {
-        const target = e.currentTarget as HTMLInputElement;
-        updateWidgetConfig("weather", {
-            order: Math.max(0, parseInt(target.value) || 0),
+        handleInputChange(e, (value) =>
+            updateWidgetConfig("weather", {
+                order: Math.max(0, parseInt(value as string) || 0),
+            }),
+        );
+    }
+
+    function handleWidgetSize(widget: Widget, e: Event) {
+        const target = e.target as HTMLSelectElement;
+        const [w, h] = target.value.split("x").map(Number);
+        updateWidgetConfig(widget.id, {
+            size: { w, h } as WidgetSize,
         });
     }
 
-    function updateGridConfig(key: keyof GridConfig, value: any) {
+    function updateGridConfig(key: keyof GridConfig, value: number | string) {
         if ($widgetLayout?.grid) {
             widgetLayout.updateGrid({ [key]: value });
         }
@@ -211,9 +230,11 @@
                                 min="1"
                                 max="12"
                                 on:change={(e) =>
-                                    updateGridConfig(
-                                        "columns",
-                                        parseInt(e.target.value),
+                                    handleInputChange(e, (value) =>
+                                        updateGridConfig(
+                                            "columns",
+                                            parseInt(value as string),
+                                        ),
                                     )}
                             />
                         </div>
@@ -227,9 +248,11 @@
                                 min="1"
                                 max="12"
                                 on:change={(e) =>
-                                    updateGridConfig(
-                                        "rows",
-                                        parseInt(e.target.value),
+                                    handleInputChange(e, (value) =>
+                                        updateGridConfig(
+                                            "rows",
+                                            parseInt(value as string),
+                                        ),
                                     )}
                             />
                         </div>
@@ -244,9 +267,11 @@
                                 max="8"
                                 step="0.5"
                                 on:change={(e) =>
-                                    updateGridConfig(
-                                        "gap",
-                                        parseFloat(e.target.value),
+                                    handleInputChange(e, (value) =>
+                                        updateGridConfig(
+                                            "gap",
+                                            parseFloat(value as string),
+                                        ),
                                     )}
                             />
                         </div>
@@ -259,9 +284,11 @@
                                 class="select select-bordered w-full"
                                 value={$widgetLayout.grid.direction}
                                 on:change={(e) =>
-                                    updateGridConfig(
-                                        "direction",
-                                        e.target.value,
+                                    handleInputChange(e, (value) =>
+                                        updateGridConfig(
+                                            "direction",
+                                            value as string,
+                                        ),
                                     )}
                             >
                                 <option value="horizontal">Horizontal</option>
@@ -290,9 +317,11 @@
                                         class="toggle"
                                         checked={widget.enabled}
                                         on:change={(e) =>
-                                            updateWidgetConfig(widget.id, {
-                                                enabled: e.target.checked,
-                                            })}
+                                            handleInputChange(e, (value) =>
+                                                updateWidgetConfig(widget.id, {
+                                                    enabled: value as boolean,
+                                                }),
+                                            )}
                                     />
                                 </label>
                             </div>
@@ -301,21 +330,18 @@
                                     <label class="label" for="width-{widget.id}"
                                         >Width</label
                                     >
-                                    <input
-                                        type="number"
-                                        id="width-{widget.id}"
-                                        class="input input-bordered w-full"
-                                        value={widget.size.w}
-                                        min="1"
-                                        max={$widgetLayout.grid.columns}
+                                    <select
+                                        id="size-{widget.id}"
+                                        class="select select-bordered w-full"
+                                        value="{widget.size.w}x{widget.size.h}"
                                         on:change={(e) =>
-                                            updateWidgetConfig(widget.id, {
-                                                size: {
-                                                    ...widget.size,
-                                                    w: parseInt(e.target.value),
-                                                },
-                                            })}
-                                    />
+                                            handleWidgetSize(widget, e)}
+                                    >
+                                        <option value="1x1">Small (1x1)</option>
+                                        <option value="2x2">Medium (2x2)</option
+                                        >
+                                        <option value="4x2">Large (4x2)</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label
@@ -330,12 +356,16 @@
                                         min="1"
                                         max={$widgetLayout.grid.rows}
                                         on:change={(e) =>
-                                            updateWidgetConfig(widget.id, {
-                                                size: {
-                                                    ...widget.size,
-                                                    h: parseInt(e.target.value),
-                                                },
-                                            })}
+                                            handleInputChange(e, (value) =>
+                                                updateWidgetConfig(widget.id, {
+                                                    size: {
+                                                        ...widget.size,
+                                                        h: parseInt(
+                                                            value as string,
+                                                        ),
+                                                    },
+                                                }),
+                                            )}
                                     />
                                 </div>
                             </div>
@@ -350,9 +380,13 @@
                                     value={widget.order}
                                     min="0"
                                     on:change={(e) =>
-                                        updateWidgetConfig(widget.id, {
-                                            order: parseInt(e.target.value),
-                                        })}
+                                        handleInputChange(e, (value) =>
+                                            updateWidgetConfig(widget.id, {
+                                                order: parseInt(
+                                                    value as string,
+                                                ),
+                                            }),
+                                        )}
                                 />
                             </div>
                         </div>

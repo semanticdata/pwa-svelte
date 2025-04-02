@@ -58,20 +58,21 @@
     return () => clearInterval(interval);
   });
 
-  const sizeClasses = {
-    sm: "col-span-1 row-span-1",
-    md: "col-span-2 row-span-2",
-    lg: "col-span-4 row-span-2",
-  };
+  $: gridStyle = `
+    grid-template-columns: repeat(${grid.columns}, minmax(0, 1fr));
+    grid-template-rows: repeat(${grid.rows}, minmax(0, auto));
+    gap: ${grid.gap}rem;
+    grid-auto-flow: ${grid.direction === "vertical" ? "column" : "row"};
+  `;
 </script>
 
 <main
   class="h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8 select-none overflow-hidden"
 >
-  <div class="grid grid-cols-4 gap-4 auto-rows-min h-full">
+  <div class="grid auto-rows-min h-full" style={gridStyle}>
     {#if clockWidget?.enabled}
       <div
-        class={`${sizeClasses[clockWidget.size]}`}
+        class="col-span-{clockWidget.size.w} row-span-{clockWidget.size.h}"
         style="order: {clockWidget.order}"
       >
         <div class="hero bg-white dark:bg-gray-800 rounded-box h-full">
@@ -100,7 +101,7 @@
 
     {#if weatherWidget?.enabled}
       <div
-        class={`${sizeClasses[weatherWidget.size]}`}
+        class="col-span-{weatherWidget.size.w} row-span-{weatherWidget.size.h}"
         style="order: {weatherWidget.order}"
       >
         <Weather />

@@ -90,7 +90,7 @@ export const defaultLayout: WidgetLayout = {
 };
 
 // Add export to type declarations
-export type { Widget, WidgetLayout, GridConfig };
+export type { Widget, WidgetLayout, GridConfig, WidgetSize };
 
 function createWidgetStore() {
     let initialLayout: WidgetLayout;
@@ -122,9 +122,26 @@ function createWidgetStore() {
             return newLayout;
         }),
         updateGrid: (config: Partial<GridConfig>) => update(layout => {
+            // Validate and clamp grid values
+            const validatedConfig = { ...config };
+            if ('columns' in validatedConfig) {
+                validatedConfig.columns = Math.max(1, Math.min(12, validatedConfig.columns || 1));
+            }
+            if ('rows' in validatedConfig) {
+                validatedConfig.rows = Math.max(1, Math.min(12, validatedConfig.rows || 1));
+            }
+            if ('gap' in validatedConfig) {
+                validatedConfig.gap = Math.max(0, Math.min(8, validatedConfig.gap || 0));
+            }
+            if ('direction' in validatedConfig) {
+                validatedConfig.direction = ['horizontal', 'vertical'].includes(validatedConfig.direction as string)
+                    ? validatedConfig.direction
+                    : 'horizontal';
+            }
+
             const newLayout = {
                 ...layout,
-                grid: { ...layout.grid, ...config }
+                grid: { ...layout.grid, ...validatedConfig }
             };
             localStorage.setItem('widget_layout', JSON.stringify(newLayout));
             return newLayout;
