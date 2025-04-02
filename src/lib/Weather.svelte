@@ -75,7 +75,7 @@
                                 {weather.description}
                             </div>
                             <div class="stat-value text-4xl">
-                                {weather.temperature}°C
+                                {weather.temperature}{weather.units.temp}
                             </div>
                             <div class="stat-desc">{weather.location}</div>
                         </div>
@@ -89,7 +89,8 @@
                         <div class="stat">
                             <div class="stat-title">Wind Speed</div>
                             <div class="stat-value">
-                                {weather.windSpeed} m/s
+                                {weather.windSpeed}
+                                {weather.units.wind}
                             </div>
                         </div>
                     </div>

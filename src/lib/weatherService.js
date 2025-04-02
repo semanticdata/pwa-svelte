@@ -1,4 +1,5 @@
 let OPENWEATHER_API_KEY = localStorage.getItem('openweather_api_key') || '';
+let UNITS = localStorage.getItem('weather_units') || 'metric';
 const STORAGE_KEY = 'weather_location';
 const WEATHER_CACHE_KEY = 'weather_cache';
 const CACHE_DURATION = 3600000; // 1 hour in milliseconds
@@ -7,10 +8,16 @@ class WeatherService {
     constructor() {
         this.location = this.getSavedLocation();
         OPENWEATHER_API_KEY = localStorage.getItem('openweather_api_key') || '';
+        UNITS = localStorage.getItem('weather_units') || 'metric';
     }
 
     setApiKey(apiKey) {
         OPENWEATHER_API_KEY = apiKey;
+    }
+
+    setUnits(units) {
+        UNITS = units;
+        localStorage.setItem('weather_units', units);
     }
 
     async getCurrentPosition() {
@@ -47,7 +54,7 @@ class WeatherService {
 
         try {
             const response = await fetch(
-                `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&units=metric&appid=${OPENWEATHER_API_KEY}`
+                `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&units=${UNITS}&appid=${OPENWEATHER_API_KEY}`
             );
             if (!response.ok) {
                 if (response.status === 401) {
@@ -56,6 +63,9 @@ class WeatherService {
                 throw new Error(`Weather data fetch failed with status ${response.status}`);
             }
             const data = await response.json();
+            const windSpeedUnit = UNITS === 'imperial' ? 'mph' : 'm/s';
+            const tempUnit = UNITS === 'imperial' ? '°F' : '°C';
+
             return {
                 temperature: Math.round(data.main.temp),
                 condition: data.weather[0].main,
@@ -63,7 +73,11 @@ class WeatherService {
                 icon: data.weather[0].icon,
                 location: data.name,
                 humidity: data.main.humidity,
-                windSpeed: Math.round(data.wind.speed * 10) / 10
+                windSpeed: Math.round(data.wind.speed * 10) / 10,
+                units: {
+                    temp: tempUnit,
+                    wind: windSpeedUnit
+                }
             };
 
             // Cache the weather data
