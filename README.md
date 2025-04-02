@@ -1,16 +1,66 @@
-# Svelte + Vite
+# PWA Digital Clock with Weather
 
-This template should help get you started developing with Svelte in Vite.
+A Progressive Web Application built with Svelte and Vite, featuring a digital clock and weather display. The app showcases modern web development practices with a beautiful, responsive UI powered by TailwindCSS.
+
+## Features
+
+- Real-time digital clock display
+- Date display with full formatting
+- Weather information display (coming soon)
+- Progressive Web App capabilities
+- Responsive design with TailwindCSS
+- Modern, clean UI with backdrop blur effects
+
+## Tech Stack
+
+- Svelte 5
+- Vite 6
+- TailwindCSS
+- PWA features (Service Workers)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (Latest LTS version recommended)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+### Development
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+### Building for Production
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+Preview the production build:
+
+```bash
+npm run preview
+```
 
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
 
-## Need an official Svelte framework?
-
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
-
-## Technical considerations
+## Technical Considerations
 
 **Why use this over SvelteKit?**
 
