@@ -23,12 +23,21 @@
 
     function formatLastUpdate() {
         if (!lastUpdate) return "";
-        const now = new Date();
-        const diff = Math.floor((now.getTime() - lastUpdate.getTime()) / 1000); // difference in seconds
+        if (weather?.isMock) return "Using mock weather data";
 
-        if (diff < 60) return "Updated just now";
-        if (diff < 3600) return `Updated ${Math.floor(diff / 60)} minutes ago`;
-        return `Updated at ${lastUpdate.toLocaleTimeString()}`;
+        const now = new Date();
+        const diff = Math.floor((now.getTime() - lastUpdate.getTime()) / 1000);
+
+        if (diff < 60) return "Updated less than a minute ago";
+        if (diff < 3600) {
+            const minutes = Math.floor(diff / 60);
+            return `Updated ${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+        }
+        if (diff < 86400) {
+            const hours = Math.floor(diff / 3600);
+            return `Updated ${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+        }
+        return `Updated on ${lastUpdate.toLocaleDateString()} at ${lastUpdate.toLocaleTimeString()}`;
     }
 
     onMount(() => {

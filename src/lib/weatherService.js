@@ -98,7 +98,12 @@ class WeatherService {
 
     async getWeather(coords, forceRefresh = false) {
         if (USE_MOCK_DATA) {
-            return mockWeatherData;
+            const mockResult = {
+                ...mockWeatherData,
+                isMock: true
+            };
+            this.cacheWeather(mockResult);
+            return mockResult;
         }
 
         if (!forceRefresh) {
@@ -170,7 +175,8 @@ class WeatherService {
                     wind: windSpeedUnit,
                     pressure: pressureUnit
                 },
-                daily: dailyForecasts
+                daily: dailyForecasts,
+                isMock: false
             };
 
             this.cacheWeather(current);
