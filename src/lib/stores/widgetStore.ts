@@ -26,15 +26,15 @@ interface WeatherWidget extends BaseWidget {
     config: Record<string, never>;
 }
 
-interface QuotesWidget extends BaseWidget {
-    id: 'quotes';
+interface TickTickWidget extends BaseWidget {
+    id: 'ticktick';
     config: {
-        category: string;
-        refreshInterval: number;
+        listId: string;
+        showCompleted: boolean;
     };
 }
 
-type Widget = ClockWidget | WeatherWidget | QuotesWidget;
+type Widget = ClockWidget | WeatherWidget | TickTickWidget;
 
 interface GridConfig {
     columns: number;
@@ -76,14 +76,14 @@ export const defaultLayout: WidgetLayout = {
             size: { w: 2, h: 2 },
             config: {}
         },
-        quotes: {
-            id: 'quotes',
+        ticktick: {
+            id: 'ticktick',
             enabled: false,
             order: 2,
-            size: { w: 2, h: 1 },
+            size: { w: 2, h: 2 },
             config: {
-                category: 'motivation',
-                refreshInterval: 3600 // in seconds
+                listId: '',
+                showCompleted: false
             }
         }
     }

@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import Weather from "./lib/Weather.svelte";
   import Settings from "./lib/Settings.svelte";
+  import TickTick from "./lib/TickTick.svelte";
   import { widgetLayout, defaultLayout } from "./lib/stores/widgetStore";
   import { weatherService } from "./lib/weatherService";
 
@@ -23,6 +24,7 @@
     defaultLayout.widgets.weather.config;
   $: weatherWidget =
     $widgetLayout?.widgets?.weather ?? defaultLayout.widgets.weather;
+  $: tickTickWidget = $widgetLayout?.widgets?.ticktick ?? defaultLayout.widgets.ticktick;
   $: grid = $widgetLayout?.grid ?? defaultLayout.grid;
 
   function updateTime() {
@@ -102,6 +104,15 @@
         style="order: {weatherWidget.order}"
       >
         <Weather />
+      </div>
+    {/if}
+
+    {#if tickTickWidget?.enabled}
+      <div
+        class="col-span-{tickTickWidget.size.w} row-span-{tickTickWidget.size.h}"
+        style="order: {tickTickWidget.order}"
+      >
+        <TickTick />
       </div>
     {/if}
   </div>

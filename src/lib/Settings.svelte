@@ -3,6 +3,7 @@
     import { weatherService } from "./weatherService";
     import { widgetLayout, defaultLayout } from "./stores/widgetStore";
     import type { Widget, GridConfig, WidgetSize } from "./stores/widgetStore";
+    import { tickTickService } from "./tickTickService";
 
     let showModal = false;
     let apiKey = "";
@@ -14,6 +15,9 @@
     let locationSearch = "";
     let searchError = "";
     let activeTab = "grid";
+    let tickTickClientId = localStorage.getItem('ticktick_client_id') || "";
+    let tickTickClientSecret = localStorage.getItem('ticktick_client_secret') || "";
+    let tickTickConfig = $widgetLayout?.widgets?.ticktick?.config ?? defaultLayout.widgets.ticktick.config;
 
     onMount(() => {
         apiKey = localStorage.getItem("openweather_api_key") || "";
@@ -86,6 +90,12 @@
                     lon: parseFloat(longitude),
                 });
             }
+
+            // Update TickTick credentials and authenticate
+            if (tickTickClientId && tickTickClientSecret) {
+                tickTickService.setClientCredentials(tickTickClientId, tickTickClientSecret);
+            }
+
             showModal = false;
             window.location.reload();
         } catch (error) {
@@ -213,6 +223,12 @@
                     on:click={() => (activeTab = "weather")}
                 >
                     Weather
+                </button>
+                <button
+                    class="tab {activeTab === 'ticktick' ? 'tab-active' : ''}"
+                    on:click={() => (activeTab = "ticktick")}
+                >
+                    TickTick
                 </button>
             </div>
 
@@ -435,6 +451,25 @@
                                     </label>
                                 </div>
                             {/if}
+                            {#if widget.id === "ticktick"}
+                                <div class="form-control mt-2">
+                                    <label class="label cursor-pointer">
+                                        <span class="label-text">Show Completed Tasks</span>
+                                        <input
+                                            type="checkbox"
+                                            class="toggle"
+                                            checked={widget.config?.showCompleted ?? false}
+                                            on:change={(e) =>
+                                                updateWidgetConfig(widget.id, {
+                                                    config: {
+                                                        ...widget.config,
+                                                        showCompleted: (e.target as HTMLInputElement).checked,
+                                                    },
+                                                })}
+                                        />
+                                    </label>
+                                </div>
+                            {/if}
                         </div>
                     </div>
                 {/each}
@@ -464,6 +499,7 @@
                 </div>
                 <div class="form-control w-full mt-4">
                     <label class="label" for="units">
+                    <!-- </label> -->
                         <span class="label-text">Temperature Units</span>
                     </label>
                     <select
@@ -567,6 +603,31 @@
                         </div>
                     </div>
                 {/if}
+            {:else if activeTab === "ticktick"}
+                <div class="form-control w-full">
+                    <label class="label" for="tickTickClientId">
+                        <span class="label-text">TickTick Client ID</span>
+                    </label>
+                    <input
+                        type="password"
+                        id="tickTickClientId"
+                        placeholder="Enter your client ID"
+                        class="input input-bordered w-full"
+                        bind:value={tickTickClientId}
+                    />
+                </div>
+                <div class="form-control w-full mt-4">
+                    <label class="label" for="tickTickClientSecret">
+                        <span class="label-text">TickTick Client Secret</span>
+                    </label>
+                    <input
+                        type="password"
+                        id="tickTickClientSecret"
+                        placeholder="Enter your client secret"
+                        class="input input-bordered w-full"
+                        bind:value={tickTickClientSecret}
+                    />
+                </div>
             {/if}
 
             <div class="modal-action">
