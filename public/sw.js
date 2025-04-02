@@ -3,9 +3,10 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/vite.svg',
-  '/src/main.js',
-  '/src/App.svelte'
+  '/icon-192.svg',
+  '/icon-512.svg',
+  '/assets/index.js',
+  '/assets/index.css'
 ];
 
 self.addEventListener('install', (event) => {
