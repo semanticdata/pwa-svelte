@@ -85,6 +85,7 @@
                 });
             }
             showModal = false;
+            window.location.reload();
         } catch (error) {
             searchError = error.message;
         }
@@ -332,6 +333,44 @@
                             placeholder="Order"
                         />
                     </div>
+                </div>
+                <div class="flex gap-4 items-center mt-2">
+                    <label class="cursor-pointer flex items-center gap-2">
+                        <span class="label-text">24-Hour Format</span>
+                        <input
+                            type="checkbox"
+                            class="toggle bg-gray-200 checked:bg-blue-500"
+                            checked={$widgetLayout.clock.show24Hour}
+                            on:change={(e) =>
+                                updateWidgetConfig("clock", {
+                                    show24Hour: e.currentTarget.checked,
+                                })}
+                        />
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-2">
+                        <span class="label-text">Show Seconds</span>
+                        <input
+                            type="checkbox"
+                            class="toggle bg-gray-200 checked:bg-blue-500"
+                            checked={$widgetLayout.clock.showSeconds}
+                            on:change={(e) =>
+                                updateWidgetConfig("clock", {
+                                    showSeconds: e.currentTarget.checked,
+                                })}
+                        />
+                    </label>
+                    <label class="cursor-pointer flex items-center gap-2">
+                        <span class="label-text">Show Location</span>
+                        <input
+                            type="checkbox"
+                            class="toggle bg-gray-200 checked:bg-blue-500"
+                            checked={$widgetLayout.clock.showLocation}
+                            on:change={(e) =>
+                                updateWidgetConfig("clock", {
+                                    showLocation: e.currentTarget.checked,
+                                })}
+                        />
+                    </label>
                 </div>
             </div>
 

@@ -1,7 +1,14 @@
 import { writable } from 'svelte/store';
 
 const defaultLayout = {
-    clock: { enabled: true, order: 0, size: 'lg' },
+    clock: {
+        enabled: true,
+        order: 0,
+        size: 'lg',
+        show24Hour: false,
+        showSeconds: false,
+        showLocation: false
+    },
     weather: { enabled: true, order: 1, size: 'md' }
 };
 

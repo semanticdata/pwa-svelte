@@ -1,8 +1,9 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
   import Weather from "./lib/Weather.svelte";
   import Settings from "./lib/Settings.svelte";
   import { widgetLayout } from "./lib/stores/widgetStore";
+  import { weatherService } from "./lib/weatherService";
 
   let timeString;
   let dateString = new Date().toLocaleDateString("en-US", {
@@ -12,17 +13,37 @@
     day: "numeric",
   });
 
+  let cityName = "";
+
   function updateTime() {
-    timeString = new Date().toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+    const options = {
+      hour: clockWidget?.show24Hour
+        ? ("2-digit" as const)
+        : ("numeric" as const),
+      minute: "2-digit" as const,
+      second: clockWidget?.showSeconds ? ("2-digit" as const) : undefined,
+      hour12: !clockWidget?.show24Hour,
+    };
+    timeString = new Date().toLocaleTimeString("en-US", options);
   }
 
   onMount(() => {
     updateTime();
-    const interval = setInterval(updateTime, 1000);
+    const interval = setInterval(
+      updateTime,
+      clockWidget?.showSeconds ? 1000 : 60000,
+    );
+
+    if (clockWidget?.showLocation) {
+      (async () => {
+        const location = weatherService.getSavedLocation();
+        if (location) {
+          const weather = await weatherService.getWeather();
+          cityName = weather.name;
+        }
+      })();
+    }
+
     return () => clearInterval(interval);
   });
 
@@ -56,6 +77,13 @@
               <p class="text-xl md:text-2xl lg:text-3xl font-normal opacity-80">
                 {dateString}
               </p>
+              {#if clockWidget.showLocation && cityName}
+                <p
+                  class="text-lg md:text-xl lg:text-2xl font-normal opacity-60 mt-2"
+                >
+                  {cityName}
+                </p>
+              {/if}
             </div>
           </div>
         </div>
