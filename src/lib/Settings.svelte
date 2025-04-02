@@ -389,6 +389,52 @@
                                         )}
                                 />
                             </div>
+                            {#if widget.id === "clock"}
+                                <div class="form-control mt-2">
+                                    <label class="label cursor-pointer">
+                                        <span class="label-text"
+                                            >24-hour format</span
+                                        >
+                                        <input
+                                            type="checkbox"
+                                            class="toggle"
+                                            checked={widget.config
+                                                ?.show24Hour ?? false}
+                                            on:change={(e) =>
+                                                updateWidgetConfig(widget.id, {
+                                                    config: {
+                                                        ...widget.config,
+                                                        show24Hour: (
+                                                            e.target as HTMLInputElement
+                                                        ).checked,
+                                                    },
+                                                })}
+                                        />
+                                    </label>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label cursor-pointer">
+                                        <span class="label-text"
+                                            >Show seconds</span
+                                        >
+                                        <input
+                                            type="checkbox"
+                                            class="toggle"
+                                            checked={widget.config
+                                                ?.showSeconds ?? false}
+                                            on:change={(e) =>
+                                                updateWidgetConfig(widget.id, {
+                                                    config: {
+                                                        ...widget.config,
+                                                        showSeconds: (
+                                                            e.target as HTMLInputElement
+                                                        ).checked,
+                                                    },
+                                                })}
+                                        />
+                                    </label>
+                                </div>
+                            {/if}
                         </div>
                     </div>
                 {/each}

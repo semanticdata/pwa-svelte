@@ -3,7 +3,6 @@
   import Weather from "./lib/Weather.svelte";
   import Settings from "./lib/Settings.svelte";
   import { widgetLayout, defaultLayout } from "./lib/stores/widgetStore";
-  import type { Widget } from "./lib/stores/widgetStore";
   import { weatherService } from "./lib/weatherService";
 
   let timeString;
@@ -28,13 +27,11 @@
 
   function updateTime() {
     const options = {
-      hour: clockConfig?.show24Hour
-        ? ("2-digit" as const)
-        : ("numeric" as const),
-      minute: "2-digit" as const,
-      second: clockConfig?.showSeconds ? ("2-digit" as const) : undefined,
+      hour: clockConfig?.show24Hour ? "2-digit" : "numeric",
+      minute: "2-digit",
+      second: clockConfig?.showSeconds ? "2-digit" : undefined,
       hour12: !clockConfig?.show24Hour,
-    };
+    } as const;
     timeString = new Date().toLocaleTimeString("en-US", options);
   }
 
