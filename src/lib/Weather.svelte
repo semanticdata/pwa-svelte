@@ -36,9 +36,13 @@
     });
 </script>
 
-<div class="card w-full bg-white dark:bg-gray-800 shadow-xl backdrop-blur-lg flex-1 min-h-0">
+<div
+    class="card w-full bg-white dark:bg-gray-800 shadow-xl backdrop-blur-lg flex-1 min-h-0"
+>
     <div class="card-body h-full overflow-y-auto p-4">
-        <h2 class="card-title text-2xl mb-2 sticky top-0 bg-white dark:bg-gray-800 py-2 z-10">
+        <h2
+            class="card-title text-2xl mb-2 sticky top-0 bg-white dark:bg-gray-800 py-2 z-10"
+        >
             Weather
         </h2>
         <div class="text-base">
@@ -64,7 +68,9 @@
                 </div>
             {:else if weather}
                 <div class="flex flex-col gap-2">
-                    <div class="stats stats-compact bg-gray-100 dark:bg-gray-700 shadow">
+                    <div
+                        class="stats stats-compact bg-gray-100 dark:bg-gray-700 shadow"
+                    >
                         <div class="stat py-2">
                             <div class="stat-figure text-secondary">
                                 <img

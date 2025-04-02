@@ -6,6 +6,7 @@
     let apiKey = "";
     let units = "metric";
     let useManualLocation = false;
+    let useMockWeather = false;
     let latitude = "";
     let longitude = "";
     let locationSearch = "";
@@ -16,12 +17,18 @@
         units = localStorage.getItem("weather_units") || "metric";
         useManualLocation =
             localStorage.getItem("use_manual_location") === "true";
+        useMockWeather = localStorage.getItem("use_mock_weather") === "true";
         const savedLocation = weatherService.getSavedLocation();
         if (savedLocation) {
             latitude = savedLocation.lat.toString();
             longitude = savedLocation.lon.toString();
         }
     });
+
+    function handleMockWeatherToggle() {
+        localStorage.setItem("use_mock_weather", String(useMockWeather));
+        window.location.reload();
+    }
 
     async function validateApiKey(key) {
         try {
@@ -114,7 +121,9 @@
 
 {#if showModal}
     <div class="modal modal-open">
-        <div class="modal-box max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800">
+        <div
+            class="modal-box max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800"
+        >
             <h3 class="font-bold text-lg mb-4">Settings</h3>
             <div class="form-control w-full">
                 <label class="label" for="apiKey">
@@ -163,6 +172,22 @@
                     />
                 </label>
             </div>
+
+            {#if import.meta.env.DEV}
+                <div class="form-control w-full mt-4">
+                    <label class="label cursor-pointer">
+                        <span class="label-text"
+                            >Use Mock Weather Data (Dev Only)</span
+                        >
+                        <input
+                            type="checkbox"
+                            class="toggle bg-gray-200 checked:bg-blue-500"
+                            bind:checked={useMockWeather}
+                            on:change={handleMockWeatherToggle}
+                        />
+                    </label>
+                </div>
+            {/if}
 
             {#if useManualLocation}
                 <div class="form-control w-full mt-4">

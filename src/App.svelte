@@ -32,10 +32,12 @@
   <div class="hero bg-white dark:bg-gray-800 rounded-box shrink-0">
     <div class="hero-content text-center">
       <div>
-        <h1 class="text-[clamp(3rem,15vw,8rem)] font-bold mb-4 tracking-tight">
+        <h1
+          class="text-4xl md:text-6xl lg:text-8xl font-bold mb-4 tracking-tight"
+        >
           {timeString}
         </h1>
-        <p class="text-[clamp(1.5rem,5vw,2.5rem)] font-normal opacity-80">
+        <p class="text-xl md:text-2xl lg:text-3xl font-normal opacity-80">
           {dateString}
         </p>
       </div>

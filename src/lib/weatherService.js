@@ -1,8 +1,11 @@
+import { mockWeatherData } from './mockWeatherData';
+
 let OPENWEATHER_API_KEY = localStorage.getItem('openweather_api_key') || '';
 let UNITS = localStorage.getItem('weather_units') || 'metric';
 const STORAGE_KEY = 'weather_location';
 const WEATHER_CACHE_KEY = 'weather_cache';
 const CACHE_DURATION = 3600000; // 1 hour in milliseconds
+const USE_MOCK_DATA = import.meta.env.DEV && localStorage.getItem('use_mock_weather') === 'true';
 
 class WeatherService {
     constructor() {
@@ -94,6 +97,10 @@ class WeatherService {
     }
 
     async getWeather(coords, forceRefresh = false) {
+        if (USE_MOCK_DATA) {
+            return mockWeatherData;
+        }
+
         if (!forceRefresh) {
             const cachedData = this.getCachedWeather();
             if (cachedData) {
@@ -104,7 +111,7 @@ class WeatherService {
         try {
             const apiKey = this.getApiKey();
             const units = this.getUnits();
-            
+
             if (!apiKey) {
                 throw new Error('API key not found. Please set your OpenWeather API key in settings.');
             }
