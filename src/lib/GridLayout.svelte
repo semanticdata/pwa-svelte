@@ -20,13 +20,13 @@
             {
                 column: 12,
                 row: 12,
-                cellHeight: 60,
+                cellHeight: "8vh",
                 animate: true,
                 draggable: {
                     handle: ".grid-stack-item-content",
                 },
                 resizable: {
-                    handles: "all",
+                    handles: "se",
                 },
             },
             gridElement,
@@ -80,11 +80,11 @@
         {#if (item.content === "clock" && $componentSettings.showClock) || (item.content === "placeholder" && $componentSettings.showPlaceholder)}
             <div
                 class="grid-stack-item"
-                data-gs-id={item.id}
-                data-gs-x={item.x}
-                data-gs-y={item.y}
-                data-gs-width={item.w}
-                data-gs-height={item.h}
+                gs-id={item.id}
+                gs-x={item.x}
+                gs-y={item.y}
+                gs-w={item.w}
+                gs-h={item.h}
             >
                 <div
                     class="grid-stack-item-content bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4"
@@ -97,6 +97,19 @@
 </div>
 
 <style>
+    :global(body) {
+        margin: 0;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+    }
+
+    :global(.grid-stack) {
+        height: 100vh !important;
+        width: 100vw !important;
+        margin: 0 !important;
+    }
+
     :global(.grid-stack-item-content) {
         cursor: move;
     }
