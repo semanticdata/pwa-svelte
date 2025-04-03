@@ -19,16 +19,16 @@ const initialState: GridState = {
             id: 'clock',
             x: 0,
             y: 0,
-            w: 6,
-            h: 6,
+            w: 5,
+            h: 5,
             content: 'clock'
         },
         {
             id: 'placeholder',
             x: 0,
-            y: 4,
-            w: 6,
-            h: 6,
+            y: 5,
+            w: 5,
+            h: 5,
             content: 'placeholder'
         }
     ]

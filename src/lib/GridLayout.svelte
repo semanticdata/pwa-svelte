@@ -20,8 +20,9 @@
             {
                 column: 12,
                 row: 12,
-                cellHeight: "8vh",
+                cellHeight: "10vh",
                 animate: true,
+                margin: 0,
                 draggable: {
                     handle: ".grid-stack-item-content",
                 },
@@ -97,18 +98,24 @@
 </div>
 
 <style>
-    :global(body) {
+    /* :global(body) {
         margin: 0;
         overflow: hidden;
         height: 100vh;
         width: 100vw;
-    }
+    } */
 
-    :global(.grid-stack) {
+    /* :global(.grid-stack) {
         height: 100vh !important;
         width: 100vw !important;
         margin: 0 !important;
-    }
+        padding: 0 !important;
+    } */
+
+    /* :global(.grid-stack-item) {
+        margin: 0 !important;
+        padding: 0 !important;
+    } */
 
     :global(.grid-stack-item-content) {
         cursor: move;
