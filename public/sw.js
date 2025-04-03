@@ -1,4 +1,4 @@
-const CACHE_NAME = 'weather-pwa-v1';
+const CACHE_NAME = 'pwa-dashboard-v1';
 const urlsToCache = [
   '/',
   '/index.html',
