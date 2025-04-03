@@ -13,7 +13,16 @@ interface GridState {
     items: GridItem[];
 }
 
-const initialState: GridState = {
+const STORAGE_KEY = 'grid-layout';
+const DEBUG = true;
+
+const log = (message: string, data?: any) => {
+    if (DEBUG) {
+        console.log(`[GridStore] ${message}`, data || '');
+    }
+};
+
+const defaultState: GridState = {
     items: [
         {
             id: 'clock',
@@ -34,4 +43,42 @@ const initialState: GridState = {
     ]
 };
 
-export const gridStore = writable<GridState>(initialState);
+const loadState = (): GridState => {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            log('Loading stored layout');
+            return JSON.parse(stored);
+        }
+    } catch (error) {
+        log('Error loading stored layout', error);
+    }
+    log('Using default layout');
+    return defaultState;
+};
+
+const initialState = loadState();
+
+const { subscribe, set, update } = writable<GridState>(initialState);
+
+export const gridStore = {
+    subscribe,
+    set: (state: GridState) => {
+        log('Setting new state', state);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        set(state);
+    },
+    update: (updater: (state: GridState) => GridState) => {
+        update(state => {
+            const newState = updater(state);
+            log('Updating state', newState);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+            return newState;
+        });
+    },
+    reset: () => {
+        log('Resetting to default layout');
+        localStorage.removeItem(STORAGE_KEY);
+        set(defaultState);
+    }
+};

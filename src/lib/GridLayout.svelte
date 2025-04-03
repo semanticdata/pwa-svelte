@@ -13,6 +13,51 @@
 
     gridStore.subscribe((state) => {
         items = state.items;
+        if (grid && grid.el) {
+            const currentItems = grid.getGridItems();
+            const currentIds = currentItems.map((el) =>
+                el.getAttribute("gs-id"),
+            );
+
+            // Remove items that no longer exist in the state
+            currentItems.forEach((el) => {
+                const id = el.getAttribute("gs-id");
+                if (!items.find((item) => item.id === id)) {
+                    grid.removeWidget(el);
+                }
+            });
+
+            // Add or update items
+            items.forEach((item) => {
+                if (
+                    (item.content === "clock" &&
+                        $componentSettings.showClock) ||
+                    (item.content === "placeholder" &&
+                        $componentSettings.showPlaceholder)
+                ) {
+                    const existingEl = grid.el.querySelector(
+                        `[gs-id="${item.id}"]`,
+                    );
+                    if (!existingEl) {
+                        grid.addWidget({
+                            id: item.id,
+                            x: item.x,
+                            y: item.y,
+                            w: item.w,
+                            h: item.h,
+                            autoPosition: false,
+                        });
+                    } else if (!currentIds.includes(item.id)) {
+                        grid.update(existingEl, {
+                            x: item.x,
+                            y: item.y,
+                            w: item.w,
+                            h: item.h,
+                        });
+                    }
+                }
+            });
+        }
     });
 
     onMount(() => {
@@ -29,12 +74,15 @@
                 resizable: {
                     handles: "se",
                 },
+                float: true,
+                disableOneColumnMode: true,
             },
             gridElement,
         );
 
-        // Update store when grid changes
         grid.on("change", (event, gridItems) => {
+            if (!grid || !grid.el) return;
+
             gridStore.update((state) => {
                 const updatedItems = state.items.map((existingItem) => {
                     const changedItem = gridItems.find(
