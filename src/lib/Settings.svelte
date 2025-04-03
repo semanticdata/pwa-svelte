@@ -142,6 +142,20 @@
                             />
                         </label>
                     </div>
+
+                    <div class="form-control">
+                        <label class="label cursor-pointer">
+                            <span class="label-text">Show Placeholder Slim</span
+                            >
+                            <input
+                                type="checkbox"
+                                class="toggle"
+                                bind:checked={
+                                    localComponentSettings.showPlaceholderSlim
+                                }
+                            />
+                        </label>
+                    </div>
                 </div>
             {/if}
 

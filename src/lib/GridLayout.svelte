@@ -5,6 +5,7 @@
     import { gridStore, type GridItem } from "./stores/gridStore";
     import Clock from "./Clock.svelte";
     import Placeholder from "./Placeholder.svelte";
+    import PlaceholderSlim from "./PlaceholderSlim.svelte";
     import { componentSettings } from "./stores/componentStore";
 
     let gridElement: HTMLElement;
@@ -34,7 +35,9 @@
                     (stateItem.content === "clock" &&
                         !$componentSettings.showClock) ||
                     (stateItem.content === "placeholder" &&
-                        !$componentSettings.showPlaceholder)
+                        !$componentSettings.showPlaceholder) ||
+                    (stateItem.content === "placeholderslim" &&
+                        !$componentSettings.showPlaceholderSlim)
                 ) {
                     grid.removeWidget(el);
                 }
@@ -46,7 +49,9 @@
                     (item.content === "clock" &&
                         $componentSettings.showClock) ||
                     (item.content === "placeholder" &&
-                        $componentSettings.showPlaceholder)
+                        $componentSettings.showPlaceholder) ||
+                    (item.content === "placeholderslim" &&
+                        $componentSettings.showPlaceholderSlim)
                 ) {
                     const existingEl = grid.el.querySelector(
                         `[gs-id="${item.id}"]`,
@@ -81,7 +86,6 @@
                 row: 12,
                 cellHeight: "8vh",
                 animate: true,
-                // margin: 0,
                 draggable: {
                     handle: ".grid-stack-item-content",
                 },
@@ -101,7 +105,6 @@
                     },
                 },
                 float: true,
-                // disableOneColumnMode: true,
             },
             gridElement,
         );
@@ -147,6 +150,8 @@
                 return Clock;
             case "placeholder":
                 return Placeholder;
+            case "placeholderslim":
+                return PlaceholderSlim;
             default:
                 return null;
         }
@@ -155,7 +160,7 @@
 
 <div class="grid-stack" bind:this={gridElement}>
     {#each items as item}
-        {#if (item.content === "clock" && $componentSettings.showClock) || (item.content === "placeholder" && $componentSettings.showPlaceholder)}
+        {#if (item.content === "clock" && $componentSettings.showClock) || (item.content === "placeholder" && $componentSettings.showPlaceholder) || (item.content === "placeholderslim" && $componentSettings.showPlaceholderSlim)}
             <div
                 class="grid-stack-item"
                 gs-id={item.id}
@@ -175,13 +180,6 @@
 </div>
 
 <style>
-    /* :global(body) {
-        margin: 0;
-        overflow: hidden;
-        height: 100vh;
-        width: 100vw;
-    } */
-
     /* :global(.grid-stack) {
         height: 100vh !important;
         width: 100vw !important;

@@ -39,6 +39,14 @@ const defaultState: GridState = {
             w: 6,
             h: 4,
             content: 'placeholder'
+        },
+        {
+            id: 'placeholderslim',
+            x: 0,
+            y: 8,
+            w: 6,
+            h: 2,
+            content: 'placeholderslim'
         }
     ]
 };
