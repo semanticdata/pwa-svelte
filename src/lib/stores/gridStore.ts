@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 
 export interface GridItem {
     id: string;
@@ -28,16 +28,16 @@ const defaultState: GridState = {
             id: 'clock',
             x: 0,
             y: 0,
-            w: 5,
-            h: 5,
+            w: 6,
+            h: 6,
             content: 'clock'
         },
         {
             id: 'placeholder',
-            x: 0,
-            y: 5,
-            w: 5,
-            h: 5,
+            x: 6,
+            y: 0,
+            w: 4,
+            h: 2,
             content: 'placeholder'
         }
     ]
@@ -79,6 +79,8 @@ export const gridStore = {
     reset: () => {
         log('Resetting to default layout');
         localStorage.removeItem(STORAGE_KEY);
-        set(defaultState);
+        const newState = JSON.parse(JSON.stringify(defaultState)); // Deep clone to ensure clean state
+        log('Default state to be applied:', newState);
+        set(newState);
     }
 };

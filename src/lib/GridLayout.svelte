@@ -11,23 +11,36 @@
     let grid: GridStack;
     let items: GridItem[];
 
-    gridStore.subscribe((state) => {
+    const unsubscribe = gridStore.subscribe((state) => {
         items = state.items;
-        if (grid && grid.el) {
-            const currentItems = grid.getGridItems();
-            const currentIds = currentItems.map((el) =>
+        if (
+            grid &&
+            grid.el &&
+            !grid.el.classList.contains("grid-stack-updating")
+        ) {
+            const currentGridItems = Array.from(
+                grid.el.querySelectorAll(".grid-stack-item"),
+            );
+            const currentIds = currentGridItems.map((el) =>
                 el.getAttribute("gs-id"),
             );
 
-            // Remove items that no longer exist in the state
-            currentItems.forEach((el) => {
+            // Remove widgets that are no longer in the state
+            currentGridItems.forEach((el) => {
                 const id = el.getAttribute("gs-id");
-                if (!items.find((item) => item.id === id)) {
+                const stateItem = items.find((item) => item.id === id);
+                if (
+                    !stateItem ||
+                    (stateItem.content === "clock" &&
+                        !$componentSettings.showClock) ||
+                    (stateItem.content === "placeholder" &&
+                        !$componentSettings.showPlaceholder)
+                ) {
                     grid.removeWidget(el);
                 }
             });
 
-            // Add or update items
+            // Update or add widgets from state
             items.forEach((item) => {
                 if (
                     (item.content === "clock" &&
@@ -38,6 +51,7 @@
                     const existingEl = grid.el.querySelector(
                         `[gs-id="${item.id}"]`,
                     );
+
                     if (!existingEl) {
                         grid.addWidget({
                             id: item.id,
@@ -47,7 +61,7 @@
                             h: item.h,
                             autoPosition: false,
                         });
-                    } else if (!currentIds.includes(item.id)) {
+                    } else {
                         grid.update(existingEl, {
                             x: item.x,
                             y: item.y,
@@ -65,17 +79,29 @@
             {
                 column: 12,
                 row: 12,
-                cellHeight: "10vh",
+                cellHeight: "8vh",
                 animate: true,
-                margin: 0,
+                // margin: 0,
                 draggable: {
                     handle: ".grid-stack-item-content",
                 },
                 resizable: {
                     handles: "se",
+                    start: (event, el) => {
+                        // Ensure element exists and has required properties
+                        if (el && el.gridstackNode) {
+                            el.gridstackNode._isResizing = true;
+                        }
+                    },
+                    stop: (event, el) => {
+                        // Clean up resize state
+                        if (el && el.gridstackNode) {
+                            el.gridstackNode._isResizing = false;
+                        }
+                    },
                 },
                 float: true,
-                disableOneColumnMode: true,
+                // disableOneColumnMode: true,
             },
             gridElement,
         );
@@ -109,6 +135,9 @@
             grid.removeAll();
             grid.destroy(false);
             grid = null;
+        }
+        if (unsubscribe) {
+            unsubscribe();
         }
     });
 
