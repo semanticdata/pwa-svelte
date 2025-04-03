@@ -1,6 +1,7 @@
 <script lang="ts">
     import { clockSettings } from "./stores/clockStore";
     import { componentSettings } from "./stores/componentStore";
+    import { gridStore } from "./stores/gridStore";
 
     let showModal = false;
     let activeTab = "clock";
@@ -69,6 +70,12 @@
                 >
                     Components
                 </button>
+                <button
+                    class="tab {activeTab === 'layout' ? 'tab-active' : ''}"
+                    on:click={() => (activeTab = "layout")}
+                >
+                    Layout
+                </button>
             </div>
 
             {#if activeTab === "clock"}
@@ -134,6 +141,35 @@
                                 }
                             />
                         </label>
+                    </div>
+                </div>
+            {/if}
+
+            {#if activeTab === "layout"}
+                <div class="space-y-4">
+                    <div class="form-control">
+                        <button
+                            class="btn btn-secondary w-full"
+                            on:click={() => {
+                                gridStore.update((state) => ({
+                                    ...state,
+                                    items: state.items.map((item) => ({
+                                        ...item,
+                                        x: item.id === "clock" ? 0 : 0,
+                                        y: item.id === "clock" ? 0 : 2,
+                                        w: 6,
+                                        h: 2,
+                                    })),
+                                }));
+                            }}
+                        >
+                            Reset Layout
+                        </button>
+                        <label class="label" for="reset-layout-help"></label>
+                        <span class="label-text-alt"
+                            >Resets all components to their default positions
+                            and sizes</span
+                        >
                     </div>
                 </div>
             {/if}
