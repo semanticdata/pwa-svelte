@@ -151,16 +151,7 @@
                         <button
                             class="btn btn-secondary w-full"
                             on:click={() => {
-                                gridStore.update((state) => ({
-                                    ...state,
-                                    items: state.items.map((item) => ({
-                                        ...item,
-                                        x: item.id === "clock" ? 0 : 0,
-                                        y: item.id === "clock" ? 0 : 2,
-                                        w: 6,
-                                        h: 2,
-                                    })),
-                                }));
+                                gridStore.reset();
                             }}
                         >
                             Reset Layout

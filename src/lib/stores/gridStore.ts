@@ -29,15 +29,15 @@ const defaultState: GridState = {
             x: 0,
             y: 0,
             w: 6,
-            h: 6,
+            h: 4,
             content: 'clock'
         },
         {
             id: 'placeholder',
-            x: 6,
-            y: 0,
-            w: 4,
-            h: 2,
+            x: 0,
+            y: 4,
+            w: 6,
+            h: 4,
             content: 'placeholder'
         }
     ]
