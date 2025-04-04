@@ -7,6 +7,7 @@
     let activeTab = "clock";
     let localClockSettings = $clockSettings;
     let localComponentSettings = $componentSettings;
+    let localGridLocked = $gridStore.isLocked;
 
     function toggleModal() {
         showModal = !showModal;
@@ -20,7 +21,10 @@
     function saveSettings() {
         clockSettings.set(localClockSettings);
         componentSettings.set(localComponentSettings);
+        gridStore.update(state => ({ ...state, isLocked: localGridLocked }));
         showModal = false;
+        // Add a small delay before reload to ensure settings are saved
+        setTimeout(() => window.location.reload(), 100);
     }
 </script>
 
@@ -168,7 +172,7 @@
                             <input
                                 type="checkbox"
                                 class="toggle toggle-primary"
-                                bind:checked={$gridStore.isLocked}
+                                bind:checked={localGridLocked}
                             />
                         </label>
                         <p class="text-sm text-base-content/70 mt-1">
@@ -195,10 +199,10 @@
 
             <div class="modal-action">
                 <button class="btn" on:click={toggleModal}>Cancel</button>
-                <button class="btn btn-primary" on:click={saveSettings}
-                    >Save</button
-                >
+                <button class="btn btn-primary" on:click={saveSettings}>Save</button>
             </div>
         </div>
     </div>
 {/if}
+
+

@@ -19,7 +19,22 @@ const DEBUG = true;
 
 const log = (message: string, data?: any) => {
     if (DEBUG) {
-        console.log(`[GridStore] ${message}`, data || '');
+        const timestamp = new Date().toISOString();
+        console.log(`[GridStore ${timestamp}] ${message}`, data || '');
+    }
+};
+
+const logGridState = (state: GridState, context: string) => {
+    if (DEBUG) {
+        log(`${context} - Grid State:`, {
+            isLocked: state.isLocked,
+            itemCount: state.items.length,
+            itemPositions: state.items.map(item => ({
+                id: item.id,
+                position: `(${item.x},${item.y})`,
+                size: `${item.w}x${item.h}`
+            }))
+        });
     }
 };
 
@@ -74,14 +89,18 @@ const { subscribe, set, update } = writable<GridState>(initialState);
 export const gridStore = {
     subscribe,
     set: (state: GridState) => {
-        log('Setting new state', state);
+        log('Setting new state');
+        logGridState(state, 'Before state update');
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         set(state);
     },
     update: (updater: (state: GridState) => GridState) => {
         update(state => {
+            log('Current state before update');
+            logGridState(state, 'Pre-update');
             const newState = updater(state);
-            log('Updating state', newState);
+            log('New state after update');
+            logGridState(newState, 'Post-update');
             localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
             return newState;
         });
@@ -90,7 +109,8 @@ export const gridStore = {
         log('Resetting to default layout');
         localStorage.removeItem(STORAGE_KEY);
         const newState = JSON.parse(JSON.stringify(defaultState)); // Deep clone to ensure clean state
-        log('Default state to be applied:', newState);
+        log('Default state to be applied');
+        logGridState(newState, 'Reset state');
         set(newState);
     }
 };

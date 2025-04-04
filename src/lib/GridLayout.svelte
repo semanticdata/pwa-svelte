@@ -9,6 +9,14 @@
     import { componentSettings } from "./stores/componentStore";
     import { get } from "svelte/store";
 
+    const DEBUG = true;
+    const log = (message: string, data?: any) => {
+        if (DEBUG) {
+            const timestamp = new Date().toISOString();
+            console.log(`[GridLayout ${timestamp}] ${message}`, data || '');
+        }
+    };
+
     let gridElement: HTMLElement;
     let grid: GridStack;
     let items: GridItem[];
@@ -116,13 +124,45 @@
         // Subscribe to lock changes
         gridStore.subscribe((state) => {
             if (grid) {
-                grid.enableMove(!state.isLocked);
-                grid.enableResize(!state.isLocked);
+                log(`Lock state changed to: ${state.isLocked}`);
+                grid.batchUpdate();
+                try {
+                    grid.enableMove(!state.isLocked);
+                    grid.enableResize(!state.isLocked);
+                    
+                    // Ensure all items are properly positioned before committing
+                    setTimeout(() => {
+                        items.forEach((item) => {
+                            const el = grid.el.querySelector(`[gs-id="${item.id}"]`);
+                            if (el) {
+                                grid.update(el, {
+                                    x: item.x,
+                                    y: item.y,
+                                    w: item.w,
+                                    h: item.h
+                                });
+                            }
+                        });
+                        grid.commit();
+                    }, 50);
+                } catch (error) {
+                    console.error('Error during grid lock state change:', error);
+                    grid.commit();
+                }
             }
         });
 
         grid.on("change", (event, gridItems) => {
             if (!grid || !grid.el) return;
+            
+            log('Grid change event detected:', {
+                eventType: event,
+                changedItems: gridItems.map(item => ({
+                    id: item.id,
+                    position: `(${item.x},${item.y})`,
+                    size: `${item.w}x${item.h}`
+                }))
+            });
 
             gridStore.update((state) => {
                 const updatedItems = state.items.map((existingItem) => {
