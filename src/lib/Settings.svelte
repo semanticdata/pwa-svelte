@@ -160,8 +160,24 @@
             {/if}
 
             {#if activeTab === "layout"}
-                <div class="space-y-4">
-                    <div class="form-control">
+                <div class="space-y-6">
+                    <div class="form-control bg-base-200 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-2">Grid Interaction</h4>
+                        <label class="label cursor-pointer">
+                            <span class="label-text">Lock Grid Layout</span>
+                            <input
+                                type="checkbox"
+                                class="toggle toggle-primary"
+                                bind:checked={$gridStore.isLocked}
+                            />
+                        </label>
+                        <p class="text-sm text-base-content/70 mt-1">
+                            When enabled, components cannot be moved or resized
+                        </p>
+                    </div>
+
+                    <div class="form-control bg-base-200 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-2">Reset Options</h4>
                         <button
                             class="btn btn-secondary w-full"
                             on:click={() => {
@@ -170,11 +186,9 @@
                         >
                             Reset Layout
                         </button>
-                        <label class="label" for="reset-layout-help"></label>
-                        <span class="label-text-alt"
-                            >Resets all components to their default positions
-                            and sizes</span
-                        >
+                        <p class="text-sm text-base-content/70 mt-2">
+                            Resets all components to their default positions and sizes
+                        </p>
                     </div>
                 </div>
             {/if}

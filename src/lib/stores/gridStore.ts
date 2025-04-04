@@ -11,6 +11,7 @@ export interface GridItem {
 
 interface GridState {
     items: GridItem[];
+    isLocked: boolean;
 }
 
 const STORAGE_KEY = 'grid-layout';
@@ -23,6 +24,7 @@ const log = (message: string, data?: any) => {
 };
 
 const defaultState: GridState = {
+    isLocked: false,
     items: [
         {
             id: 'clock',

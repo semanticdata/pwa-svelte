@@ -7,6 +7,7 @@
     import Placeholder from "./Placeholder.svelte";
     import PlaceholderSlim from "./PlaceholderSlim.svelte";
     import { componentSettings } from "./stores/componentStore";
+    import { get } from "svelte/store";
 
     let gridElement: HTMLElement;
     let grid: GridStack;
@@ -80,34 +81,45 @@
     });
 
     onMount(() => {
+        const initialLocked = get(gridStore).isLocked;
         grid = GridStack.init(
             {
                 column: 12,
                 row: 12,
                 cellHeight: "8vh",
                 animate: true,
-                draggable: {
-                    handle: ".grid-stack-item-content",
-                },
-                resizable: {
-                    handles: "se",
-                    start: (event, el) => {
-                        // Ensure element exists and has required properties
-                        if (el && el.gridstackNode) {
-                            el.gridstackNode._isResizing = true;
-                        }
-                    },
-                    stop: (event, el) => {
-                        // Clean up resize state
-                        if (el && el.gridstackNode) {
-                            el.gridstackNode._isResizing = false;
-                        }
-                    },
-                },
+                draggable: initialLocked
+                    ? false
+                    : {
+                          handle: ".grid-stack-item-content",
+                      },
+                resizable: initialLocked
+                    ? false
+                    : {
+                          handles: "se",
+                          start: (event, el) => {
+                              if (el && el.gridstackNode) {
+                                  el.gridstackNode._isResizing = true;
+                              }
+                          },
+                          stop: (event, el) => {
+                              if (el && el.gridstackNode) {
+                                  el.gridstackNode._isResizing = false;
+                              }
+                          },
+                      },
                 float: true,
             },
             gridElement,
         );
+
+        // Subscribe to lock changes
+        gridStore.subscribe((state) => {
+            if (grid) {
+                grid.enableMove(!state.isLocked);
+                grid.enableResize(!state.isLocked);
+            }
+        });
 
         grid.on("change", (event, gridItems) => {
             if (!grid || !grid.el) return;
@@ -158,7 +170,10 @@
     };
 </script>
 
-<div class="grid-stack" bind:this={gridElement}>
+<div
+    class="grid-stack {!$gridStore.isLocked ? 'unlocked' : ''}"
+    bind:this={gridElement}
+>
     {#each items as item}
         {#if (item.content === "clock" && $componentSettings.showClock) || (item.content === "placeholder" && $componentSettings.showPlaceholder) || (item.content === "placeholderslim" && $componentSettings.showPlaceholderSlim)}
             <div
@@ -180,23 +195,11 @@
 </div>
 
 <style>
-    /* :global(.grid-stack) {
-        height: 100vh !important;
-        width: 100vw !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    } */
-
-    /* :global(.grid-stack-item) {
-        margin: 0 !important;
-        padding: 0 !important;
-    } */
-
-    :global(.grid-stack-item-content) {
+    :global(.unlocked .grid-stack-item-content) {
         cursor: move;
     }
 
-    :global(.grid-stack-item-content:hover) {
+    :global(.unlocked .grid-stack-item-content:hover) {
         outline: 2px solid #4299e1;
     }
 
