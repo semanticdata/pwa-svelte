@@ -18,6 +18,17 @@ A Progressive Web Application built with Svelte and Vite, featuring a digital cl
 - TailwindCSS
 - PWA features (Service Workers)
 
+## Ideas
+
+- Pomodoro timer
+- Alarm clock
+- Stopwatch
+- To-do list (https://ticktick.com/)
+- Calendar
+- Music player widget (spotify?)
+- Notes widget
+- Quotes widget (https://wordsmith.org/)
+
 ## Getting Started
 
 ### Prerequisites
