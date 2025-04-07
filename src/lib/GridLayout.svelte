@@ -6,6 +6,7 @@
     import Clock from "./Clock.svelte";
     import Placeholder from "./Placeholder.svelte";
     import PlaceholderSlim from "./PlaceholderSlim.svelte";
+    import Weather from "./Weather.svelte";
     import { componentSettings } from "./stores/componentStore";
     import { get } from "svelte/store";
 
@@ -13,7 +14,7 @@
     const log = (message: string, data?: any) => {
         if (DEBUG) {
             const timestamp = new Date().toISOString();
-            console.log(`[GridLayout ${timestamp}] ${message}`, data || '');
+            console.log(`[GridLayout ${timestamp}] ${message}`, data || "");
         }
     };
 
@@ -46,7 +47,9 @@
                     (stateItem.content === "placeholder" &&
                         !$componentSettings.showPlaceholder) ||
                     (stateItem.content === "placeholderslim" &&
-                        !$componentSettings.showPlaceholderSlim)
+                        !$componentSettings.showPlaceholderSlim) ||
+                    (stateItem.content === "weather" &&
+                        !$componentSettings.showWeather)
                 ) {
                     grid.removeWidget(el);
                 }
@@ -60,7 +63,9 @@
                     (item.content === "placeholder" &&
                         $componentSettings.showPlaceholder) ||
                     (item.content === "placeholderslim" &&
-                        $componentSettings.showPlaceholderSlim)
+                        $componentSettings.showPlaceholderSlim) ||
+                    (item.content === "weather" &&
+                        $componentSettings.showWeather)
                 ) {
                     const existingEl = grid.el.querySelector(
                         `[gs-id="${item.id}"]`,
@@ -129,24 +134,29 @@
                 try {
                     grid.enableMove(!state.isLocked);
                     grid.enableResize(!state.isLocked);
-                    
+
                     // Ensure all items are properly positioned before committing
                     setTimeout(() => {
                         items.forEach((item) => {
-                            const el = grid.el.querySelector(`[gs-id="${item.id}"]`);
+                            const el = grid.el.querySelector(
+                                `[gs-id="${item.id}"]`,
+                            );
                             if (el) {
                                 grid.update(el, {
                                     x: item.x,
                                     y: item.y,
                                     w: item.w,
-                                    h: item.h
+                                    h: item.h,
                                 });
                             }
                         });
                         grid.commit();
                     }, 50);
                 } catch (error) {
-                    console.error('Error during grid lock state change:', error);
+                    console.error(
+                        "Error during grid lock state change:",
+                        error,
+                    );
                     grid.commit();
                 }
             }
@@ -154,14 +164,14 @@
 
         grid.on("change", (event, gridItems) => {
             if (!grid || !grid.el) return;
-            
-            log('Grid change event detected:', {
+
+            log("Grid change event detected:", {
                 eventType: event,
-                changedItems: gridItems.map(item => ({
+                changedItems: gridItems.map((item) => ({
                     id: item.id,
                     position: `(${item.x},${item.y})`,
-                    size: `${item.w}x${item.h}`
-                }))
+                    size: `${item.w}x${item.h}`,
+                })),
             });
 
             gridStore.update((state) => {
@@ -204,6 +214,8 @@
                 return Placeholder;
             case "placeholderslim":
                 return PlaceholderSlim;
+            case "weather":
+                return Weather;
             default:
                 return null;
         }
@@ -215,7 +227,7 @@
     bind:this={gridElement}
 >
     {#each items as item}
-        {#if (item.content === "clock" && $componentSettings.showClock) || (item.content === "placeholder" && $componentSettings.showPlaceholder) || (item.content === "placeholderslim" && $componentSettings.showPlaceholderSlim)}
+        {#if (item.content === "clock" && $componentSettings.showClock) || (item.content === "placeholder" && $componentSettings.showPlaceholder) || (item.content === "placeholderslim" && $componentSettings.showPlaceholderSlim) || (item.content === "weather" && $componentSettings.showWeather)}
             <div
                 class="grid-stack-item"
                 gs-id={item.id}
@@ -225,7 +237,7 @@
                 gs-h={item.h}
             >
                 <div
-                    class="grid-stack-item-content bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4"
+                    class="grid-stack-item-content bg-white dark:bg-gray-800 rounded-lg shadow-lg"
                 >
                     <svelte:component this={getComponent(item.content)} />
                 </div>

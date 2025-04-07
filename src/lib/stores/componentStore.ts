@@ -4,5 +4,6 @@ import { writable } from 'svelte/store';
 export const componentSettings = writable({
     showClock: true,
     showPlaceholder: true,
-    showPlaceholderSlim: true
+    showPlaceholderSlim: true,
+    showWeather: true,
 });

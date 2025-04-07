@@ -1,4 +1,4 @@
-import { writable, get } from 'svelte/store';
+import { writable } from 'svelte/store';
 
 export interface GridItem {
     id: string;
@@ -64,6 +64,14 @@ const defaultState: GridState = {
             w: 6,
             h: 2,
             content: 'placeholderslim'
+        },
+        {
+            id: 'weather',
+            x: 6,
+            y: 0,
+            w: 6,
+            h: 3,
+            content: 'weather'
         }
     ]
 };
