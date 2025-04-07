@@ -11,13 +11,20 @@
     })(document, "script", "weatherwidget-io-js");
 </script>
 
-<div class="">
+<div>
     <a
         class="weatherwidget-io"
-        href="https://forecast7.com/en/40d71n74d01/new-york/?unit=us"
+        href="https://forecast7.com/en/45d03n93d36/crystal/?unit=us"
         data-label_1="Crystal, MN"
-        data-label_2="WEATHER"
+        data-label_2="Weather"
         data-theme="original"
         data-basecolor="#1e2939">CRYSTAL, MN WEATHER</a
     >
 </div>
+
+<style>
+    .weatherwidget-io {
+        max-width: 699px;
+        margin: 0 auto;
+    }
+</style>
